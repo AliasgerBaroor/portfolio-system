@@ -1,21 +1,50 @@
-# shadcn/ui monorepo template
+Part 1
 
-This is a Next.js monorepo template with shadcn/ui.
+Prisma client
+JWT utilities
+bcrypt utilities
+Environment setup
 
-## Adding components
+Part 2
 
-To add components to your app, run the following command at the root of your `web` app:
+Login route
+Login service
+Session creation
+HttpOnly cookie
 
-```bash
-pnpm dlx shadcn@latest add button -c apps/web
-```
+Part 3A — Refresh Token (next)
+src/lib/hash.ts
+Update session.service.ts (hashed refresh token)
+Update login.service.ts
+refresh.service.ts
+routes/auth/refresh.ts
+Register /auth/refresh
 
-This will place the ui components in the `packages/ui/src/components` directory.
+Part 3B
+logout.service.ts
+routes/auth/logout.ts
+Clear HttpOnly cookie
+Delete session from database
+Part 3C
+middleware/auth.ts
+Verify access token
+Attach authenticated user to the Hono context
+Part 3D
+routes/auth/me.ts
+Protected /auth/me
+Return the current logged-in user
 
-## Using components
+Part 4
 
-To use the components in your app, import them from the `ui` package.
+Dashboard login page
+React hook
+API client
+Route protection
 
-```tsx
-import { Button } from "@workspace/ui/components/button";
-```
+Part 5
+
+Remember me
+Multiple devices
+Session management
+Revoke session
+Active sessions page

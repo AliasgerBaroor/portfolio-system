@@ -1,0 +1,42 @@
+.floating-navigation {
+    position: fixed;
+
+    left: 50%;
+    bottom: 32px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    z-index: 1000;
+}
+
+.floating-navigation-menu {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    padding: 8px 6px;
+
+    border-radius: 9999px;
+
+    background: #fff;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+}
+
+.floating-navigation-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 16px;
+
+    border-radius: 999px;
+
+    transition: .25s;
+
+    border: none;
+}

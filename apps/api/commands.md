@@ -1,0 +1,1 @@
+pnpm prisma migrate dev --name describe-your-change

@@ -1,0 +1,58 @@
+.gallery {
+    width: 100%;
+}
+
+/* Each card */
+.gallery-item {
+
+    overflow: hidden;
+
+    border-radius: 24px;
+
+    contain: layout paint;
+
+}
+
+/* Image & Video */
+
+.gallery-media {
+
+    display: block;
+
+    width: 100%;
+
+    height: auto;
+
+    transform: translateZ(0);
+
+    transition:
+        transform .35s ease,
+        opacity .35s ease,
+        filter .35s ease;
+
+    will-change:
+        transform,
+        opacity,
+        filter;
+
+}
+
+/* Hover effect */
+
+.gallery:hover .gallery-item .gallery-media {
+
+    opacity: .35;
+
+    filter: blur(8px);
+
+}
+
+.gallery:hover .gallery-item:hover .gallery-media {
+
+    opacity: 1;
+
+    filter: none;
+
+    transform: scale(1.03);
+
+}

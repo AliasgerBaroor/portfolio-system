@@ -1,0 +1,31 @@
+.header-item {
+    border: 1px solid var(--header-border);
+    padding: 4px;
+    border-radius: 9999px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s,
+        border-color 0.2s;
+}
+
+.header-item-inner {
+    background: var(--header-bg);
+    color: var(--header-fg);
+
+    padding: 8px;
+    border-radius: 9999px;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+
+.header-item:hover {
+    background: var(--header-bg);
+}
+
+.header-item:hover .header-item-inner {
+    background: transparent;
+}

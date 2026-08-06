@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  PASSWORD
+  UNLISTED
+}
+
+model Session {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
+
+  refreshTokenHash String @unique
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lastSeenAt DateTime? 
+
+  @@index([userId])
+}
+
+model Project {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio Portfolio @relation( fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  title String
+
+  slug String @unique
+
+  summary String?
+  content String?
+  coverImage String?
+
+  visibility Visibility @default(PUBLIC)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+  updatedAt DateTime @updatedAt
+
+  accessRules ProjectAccess[]
+
+
+  isPublished Boolean @default(false)
+  isArchived Boolean @default(false)
+
+  @@index([portfolioId])
+@@index([slug])
+@@index([visibility])
+}
+
+model PortfolioAccess {
+  accessKeyId String
+  portfolioId String
+
+accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+
+portfolio Portfolio @relation( fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@id([accessKeyId, portfolioId])
+  @@index([portfolioId])
+@@index([accessKeyId])
+}
+
+model ProjectAccess {
+  accessKeyId String
+  projectId   String
+
+accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+
+project Project @relation( fields: [projectId], references: [id], onDelete: Cascade )
+
+  @@id([accessKeyId, projectId])
+  @@index([projectId])
+@@index([accessKeyId])
+}
+
+/// Password-protected access for clients.
+model AccessKey {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner User @relation( fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name String
+
+  passwordHash String
+  accessToken String @unique
+
+  expiresAt DateTime?
+  lastSeenAt DateTime?
+
+  maxUses Int?
+
+  deviceLimit Int @default(1)
+
+  usedCount Int @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  sessions AccessKeySession[]
+
+  portfolios PortfolioAccess[]
+  projects   ProjectAccess[]
+
+  updatedAt DateTime @updatedAt
+  lastUsedAt DateTime?
+  logs AccessLog[]
+
+  @@index([ownerId])
+@@index([accessToken])
+}
+
+model AccessKeySession {
+
+  id String @id @default(cuid())
+
+  accessKeyId String
+  accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  fingerprint String
+
+  ip String?
+
+  createdAt DateTime @default(now())
+
+  expiresAt DateTime
+
+  userAgent String?
+
+deviceName String?
+
+  @@unique([accessKeyId, fingerprint])
+  @@index([accessKeyId])
+}
+
+model Portfolio {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner User @relation( fields: [ownerId], references: [id], onDelete: Restrict)
+
+  title String
+
+  slug String @unique
+
+  visibility Visibility @default(PUBLIC)
+  isPublished Boolean @default(false)
+  isArchived Boolean @default(false)
+
+  createdAt DateTime @default(now())
+deletedAt DateTime?
+
+  projects Project[]
+
+  accessRules PortfolioAccess[]
+
+  updatedAt DateTime @updatedAt
+
+    theme String?
+
+customDomain String? @unique
+
+favicon String?
+
+seoTitle String?
+
+seoDescription String?
+
+@@index([ownerId])
+@@index([slug])
+}
+
+/// Admin account for dashboard login.
+model User {
+  id String @id @default(cuid())
+
+  email        String @unique
+  passwordHash String
+
+  username String @unique
+  fullName String
+  displayName String
+  avatar String?
+
+bio String?
+
+isActive Boolean @default(true)
+
+  role UserRole @default(ADMIN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  portfolios Portfolio[]
+  sessions   Session[]
+  accessKeys AccessKey[]
+
+  lastLoginAt DateTime?
+
+  @@index([username])
+}
+
+model AccessLog {
+  id String @id @default(cuid())
+
+  accessKeyId String
+  accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+
+  ip String?
+
+  fingerprint String?
+
+  userAgent String?
+
+  success Boolean
+
+  country String?
+
+city String?
+
+browser String?
+
+os String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accessKeyId])
+@@index([createdAt])
+}

@@ -7,41 +7,39 @@ import type {
     ApiResponse,
 } from "@/types/auth";
 
-export async function login(
-    data: LoginRequest
-) {
-    const response =
-        await api.post<LoginResponse>(
+class AuthService {
+    async login(data: LoginRequest) {
+        const response = await api.post<LoginResponse>(
             "/auth/login",
             data
         );
 
-    return response.data;
-}
+        return response.data;
+    }
 
-export async function refresh() {
-    const response =
-        await api.post<LoginResponse>(
+    async refresh() {
+        const response = await api.post<LoginResponse>(
             "/auth/refresh"
         );
 
-    return response.data;
-}
+        return response.data;
+    }
 
-export async function logout() {
-    const response =
-        await api.post<ApiResponse>(
+    async logout() {
+        const response = await api.post<ApiResponse>(
             "/auth/logout"
         );
 
-    return response.data;
-}
+        return response.data;
+    }
 
-export async function me() {
-    const response =
-        await api.get<MeResponse>(
+    async me() {
+        const response = await api.get<MeResponse>(
             "/auth/me"
         );
 
-    return response.data;
+        return response.data;
+    }
 }
+
+export const authService = new AuthService();

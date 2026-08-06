@@ -1,5 +1,8 @@
+import GuestRoute from "@/components/auth/GuestRoute";
 import { LoginForm } from "@/components/auth/login-form";
 
 export default function Page() {
-  return <LoginForm />;
+  return <GuestRoute>
+    <LoginForm />
+  </GuestRoute>;
 }

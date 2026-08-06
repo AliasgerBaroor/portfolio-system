@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { Button } from "@workspace/ui/components/button";
@@ -23,11 +24,41 @@ import Link from "next/link";
 
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@/contexts/auth-context";
+
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const router = useRouter();
+
+    const {
+        login,
+        loginLoading,
+    } = useAuth();
+
+    const [error, setError] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    async function handleLogin(
+        e: React.FormEvent<HTMLFormElement>
+    ) {
+        e.preventDefault();
+
+        setError("");
+
+        try {
+            await login(email, password);
+
+            router.push("/");
+        } catch (error) {
+            if (error instanceof Error) {
+                setError(error.message);
+            }
+        }
+    }
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -42,13 +73,16 @@ export function LoginForm({
                 </CardHeader>
 
                 <CardContent className="pt-0 px-8 pb-4" >
-                    <form>
+                    <form onSubmit={handleLogin}>
                         <FieldGroup className="space-y-3">
                             <Field>
                                 <FieldLabel className="font-medium text-muted-foreground">Email</FieldLabel>
                                 <Input
                                     type="email"
                                     placeholder="m@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={loginLoading}
                                 />
                             </Field>
 
@@ -64,14 +98,32 @@ export function LoginForm({
                                     </Link>
                                 </div>
 
-                                <Input type="password" />
+                                <Input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    disabled={loginLoading}
+                                />
                             </Field>
+
+                            {
+                                error && (
+                                    <p className="text-sm text-destructive">
+                                        {error}
+                                    </p>
+                                )
+                            }
 
                             <Field>
                                 <div className="flex gap-2">
-                                    <Button className="flex-1 h-10" type="button"
-                                        onClick={() => router.push("/")}>
-                                        Login
+                                    <Button
+                                        className="flex-1 h-10"
+                                        type="submit"
+                                        disabled={loginLoading}
+                                    >
+                                        {loginLoading
+                                            ? "Logging in..."
+                                            : "Login"}
                                     </Button>
 
                                     <Button

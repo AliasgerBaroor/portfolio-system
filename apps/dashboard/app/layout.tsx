@@ -2,6 +2,8 @@ import localFont from "next/font/local";
 import "@workspace/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@workspace/ui/lib/utils";
+import { AuthProvider } from "@/contexts/auth-context";
+import { PortfolioProvider } from "@/contexts/portfolio-context";
 
 const switzer = localFont({
   src: [
@@ -123,7 +125,11 @@ export default function RootLayout({
   )}
     >
       <body>
+        <AuthProvider>
+          <PortfolioProvider>
         <ThemeProvider>{children}</ThemeProvider>
+          </PortfolioProvider>
+        </AuthProvider>
       </body>
     </html>
   )

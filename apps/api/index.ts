@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 
 import auth from "./routes/auth";
+import portfolio from "./routes/portfolio";
 
 const app = new Hono();
 
@@ -15,6 +16,7 @@ app.use(
 );
 
 app.route("/auth", auth);
+app.route("/portfolio", portfolio);
 
 app.get("/", (c) => {
   return c.json({

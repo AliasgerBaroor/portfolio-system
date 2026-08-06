@@ -38,6 +38,8 @@ login.post("/", async (c) => {
             maxAge: 60 * 60 * 24 * 30,
         });
 
+        console.log("auth.accessToken", auth.accessToken);
+        
         return c.json({
             success: true,
             accessToken: auth.accessToken,

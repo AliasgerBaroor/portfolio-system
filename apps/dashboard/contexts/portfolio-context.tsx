@@ -14,6 +14,7 @@ import { portfolioService } from "@/services/portfolio.service";
 import type {
     Portfolio,
     CreatePortfolioRequest,
+    UpdatePortfolioRequest,
 } from "@/types/portfolio";
 
 import axios from "axios";
@@ -29,6 +30,10 @@ type PortfolioContextType = {
 
     createPortfolio: (
         data: CreatePortfolioRequest
+    ) => Promise<void>;
+
+    updatePortfolio: (
+        data: UpdatePortfolioRequest
     ) => Promise<void>;
 };
 
@@ -84,6 +89,17 @@ export function PortfolioProvider({
 
         setPortfolio(response.portfolio);
     }
+
+    async function updatePortfolio(
+        data: UpdatePortfolioRequest
+    ) {
+        const response =
+            await portfolioService.updatePortfolio(
+                data
+            );
+
+        setPortfolio(response.portfolio);
+    }
     
     useEffect(() => {
         async function loadPortfolio() {
@@ -114,6 +130,8 @@ export function PortfolioProvider({
             getPortfolio,
 
             createPortfolio,
+
+            updatePortfolio,
         }),
         [portfolio, loading]
     );

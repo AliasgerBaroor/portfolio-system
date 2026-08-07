@@ -51,3 +51,17 @@ export type CreatePortfolioResponse = {
 
     portfolio: Portfolio;
 };
+
+export type UpdatePortfolioRequest = {
+    title?: string;
+    visibility?:
+    | "PUBLIC"
+    | "PRIVATE"
+    | "PASSWORD"
+    | "UNLISTED";
+};
+
+export type UpdatePortfolioResponse = {
+    success: boolean;
+    portfolio: Portfolio;
+};

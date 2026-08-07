@@ -4,6 +4,8 @@ import type {
     CreatePortfolioRequest,
     CreatePortfolioResponse,
     GetPortfolioResponse,
+    UpdatePortfolioRequest,
+    UpdatePortfolioResponse,
 } from "@/types/portfolio";
 
 class PortfolioService {
@@ -21,6 +23,18 @@ class PortfolioService {
     ) {
         const response =
             await api.post<CreatePortfolioResponse>(
+                "/portfolio",
+                data
+            );
+
+        return response.data;
+    }
+
+    async updatePortfolio(
+        data: UpdatePortfolioRequest
+    ) {
+        const response =
+            await api.patch<UpdatePortfolioResponse>(
                 "/portfolio",
                 data
             );

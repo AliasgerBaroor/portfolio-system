@@ -5,11 +5,15 @@ import { LogOut } from "lucide-react";
 import { Separator } from "@workspace/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { usePortfolio } from "@/contexts/portfolio-context";
 
 export default function Header() {
   const router = useRouter();
   const { logout } = useAuth();
-  
+    const {
+      portfolio,
+    } = usePortfolio();
+
   async function handleLogout() {
     try {
       await logout();
@@ -31,7 +35,7 @@ export default function Header() {
         </Typography>
 
         <Typography variant="heading-xl">
-          My Portfolio
+          {portfolio?.title}
         </Typography>
       </div>
 

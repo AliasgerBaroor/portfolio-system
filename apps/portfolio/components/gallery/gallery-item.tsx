@@ -6,11 +6,15 @@ import type { GalleryItem } from "./gallery.types";
 
 interface Props {
     data: GalleryItem;
+    onClick: () => void;
 }
 
-function GalleryItem({ data }: Props) {
+function GalleryItem({
+    data,
+    onClick,
+}: Props) {
     return (
-        <div className="gallery-item">
+        <div className="gallery-item cursor-pointer" onClick={onClick}>
             {data.media.type === "image" ? (
                 <Image
                     src={data.media.src}

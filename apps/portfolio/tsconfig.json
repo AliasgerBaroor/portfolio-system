@@ -19,6 +19,6 @@
     "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-, "../../packages/ui/src/components/layout/inline-editor.tsx", "components/header/sections/site-visibility/client-passwords/client-passwords.tsx"  ],
+, "../../packages/ui/src/components/layout/inline-editor.tsx", "components/header/sections/site-visibility/client-passwords/client-passwords.tsx", "../../packages/ui/src/icons/placeholder.tsx"  ],
   "exclude": ["node_modules"]
 }

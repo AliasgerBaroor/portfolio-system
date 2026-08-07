@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Visibility } from "@prisma/client";
 
 export const CreatePortfolioSchema = z.object({
     title: z
@@ -20,3 +21,21 @@ export const CreatePortfolioSchema = z.object({
 
 export type CreatePortfolioInput =
     z.infer<typeof CreatePortfolioSchema>;
+
+
+export const UpdatePortfolioSchema = z.object({
+    title: z
+        .string()
+        .trim()
+        .min(1)
+        .max(100)
+        .optional(),
+
+    visibility: z
+        .nativeEnum(Visibility)
+        .optional(),
+});
+
+export type UpdatePortfolioInput =
+    z.infer<typeof CreatePortfolioSchema>;
+

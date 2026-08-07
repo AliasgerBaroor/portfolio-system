@@ -8,15 +8,14 @@ import ClientPasswords from "@/components/dashboard/sections/site-visibility/cli
 import SiteVisibility from "@/components/dashboard/sections/site-visibility/site-visibility";
 import PortfolioGate from "@/components/portfolio/PortfolioGate";
 import { useState } from "react";
+import { usePortfolio } from "@/contexts/portfolio-context";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [visibility, setVisibility] = useState<
-    "PUBLIC" | "PASSWORD"
-  >("PUBLIC");
+  const { portfolio } = usePortfolio();
 
   return (
     <ProtectedRoute>
@@ -27,12 +26,9 @@ export default function DashboardLayout({
           <Header />
           <SiteName />
           <SiteSections />
-          <SiteVisibility
-            value={visibility}
-            onChange={setVisibility}
-          />
+          <SiteVisibility />
 
-          {visibility === "PASSWORD" && (
+              {portfolio?.visibility === "PASSWORD" && (
             <ClientPasswords />
           )}
 

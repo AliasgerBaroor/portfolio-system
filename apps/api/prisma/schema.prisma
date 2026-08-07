@@ -19,11 +19,20 @@ enum Visibility {
   UNLISTED
 }
 
+enum SectionType {
+  HERO
+  PROJECTS
+  ABOUT
+  EXPERIENCE
+  CONTACT
+  CUSTOM
+}
+
 model Session {
   id String @id @default(cuid())
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   refreshTokenHash String @unique
 
@@ -32,68 +41,112 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lastSeenAt DateTime? 
+  lastSeenAt DateTime?
 
   @@index([userId])
+}
+
+model ProjectOverview {
+  id String @id @default(cuid())
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  logo String?
+
+  category String? // Travel
+
+  shortDescription String?
+
+  collaborators String?
+
+  scope String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectGalleryImage {
+  id String @id @default(cuid())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  imageUrl String
+
+  alt String?
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, sortOrder])
 }
 
 model Project {
   id String @id @default(cuid())
 
   portfolioId String
-  portfolio Portfolio @relation( fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   title String
+  slug  String @unique
 
-  slug String @unique
-
-  summary String?
-  content String?
+  summary    String?
+  content    String?
   coverImage String?
 
   visibility Visibility @default(PUBLIC)
 
   sortOrder Int @default(0)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  updatedAt DateTime @updatedAt
+
+  isPublished Boolean @default(false)
+  isArchived  Boolean @default(false)
 
   accessRules ProjectAccess[]
 
-
-  isPublished Boolean @default(false)
-  isArchived Boolean @default(false)
+  details       ProjectOverview?
+  galleryImages ProjectGalleryImage[]
 
   @@index([portfolioId])
-@@index([slug])
-@@index([visibility])
+  @@index([slug])
+  @@index([visibility])
 }
+
+// TODO
+//ProjectMetric
+//ProjectTechnology
 
 model PortfolioAccess {
   accessKeyId String
   portfolioId String
 
-accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+  accessKey AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
-portfolio Portfolio @relation( fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@id([accessKeyId, portfolioId])
   @@index([portfolioId])
-@@index([accessKeyId])
+  @@index([accessKeyId])
 }
 
 model ProjectAccess {
   accessKeyId String
   projectId   String
 
-accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+  accessKey AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
-project Project @relation( fields: [projectId], references: [id], onDelete: Cascade )
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@id([accessKeyId, projectId])
   @@index([projectId])
-@@index([accessKeyId])
+  @@index([accessKeyId])
 }
 
 /// Password-protected access for clients.
@@ -101,14 +154,14 @@ model AccessKey {
   id String @id @default(cuid())
 
   ownerId String
-  owner User @relation( fields: [ownerId], references: [id], onDelete: Cascade)
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   name String
 
   passwordHash String
-  accessToken String @unique
+  accessToken  String @unique
 
-  expiresAt DateTime?
+  expiresAt  DateTime?
   lastSeenAt DateTime?
 
   maxUses Int?
@@ -119,7 +172,7 @@ model AccessKey {
 
   isActive Boolean @default(true)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
 
   sessions AccessKeySession[]
@@ -127,20 +180,19 @@ model AccessKey {
   portfolios PortfolioAccess[]
   projects   ProjectAccess[]
 
-  updatedAt DateTime @updatedAt
+  updatedAt  DateTime    @updatedAt
   lastUsedAt DateTime?
-  logs AccessLog[]
+  logs       AccessLog[]
 
   @@index([ownerId])
-@@index([accessToken])
+  @@index([accessToken])
 }
 
 model AccessKeySession {
-
   id String @id @default(cuid())
 
   accessKeyId String
-  accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade)
+  accessKey   AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
   fingerprint String
 
@@ -152,7 +204,7 @@ model AccessKeySession {
 
   userAgent String?
 
-deviceName String?
+  deviceName String?
 
   @@unique([accessKeyId, fingerprint])
   @@index([accessKeyId])
@@ -162,59 +214,86 @@ model Portfolio {
   id String @id @default(cuid())
 
   ownerId String
-  owner User @relation( fields: [ownerId], references: [id], onDelete: Restrict)
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
 
   title String
 
   slug String @unique
 
-  visibility Visibility @default(PUBLIC)
-  isPublished Boolean @default(false)
-  isArchived Boolean @default(false)
+  visibility  Visibility @default(PUBLIC)
+  isPublished Boolean    @default(false)
+  isArchived  Boolean    @default(false)
 
-  createdAt DateTime @default(now())
-deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   projects Project[]
 
   accessRules PortfolioAccess[]
 
+  sections PortfolioSection[]
+
   updatedAt DateTime @updatedAt
 
-    theme String?
+  theme String?
 
-customDomain String? @unique
+  customDomain String? @unique
 
-favicon String?
+  favicon String?
 
-seoTitle String?
+  seoTitle String?
 
-seoDescription String?
+  seoDescription String?
 
-@@index([ownerId])
-@@index([slug])
+  @@index([ownerId])
+  @@index([slug])
 }
 
-/// Admin account for dashboard login.
+model PortfolioSection {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type SectionType
+
+  title String
+
+  slug String
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  settings Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+  @@index([portfolioId, sortOrder])
+}
+
 model User {
   id String @id @default(cuid())
 
   email        String @unique
   passwordHash String
 
-  username String @unique
-  fullName String
+  username    String  @unique
+  fullName    String
   displayName String
-  avatar String?
+  avatar      String?
 
-bio String?
+  bio String?
 
-isActive Boolean @default(true)
+  isActive Boolean @default(true)
 
   role UserRole @default(ADMIN)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   portfolios Portfolio[]
@@ -230,7 +309,7 @@ model AccessLog {
   id String @id @default(cuid())
 
   accessKeyId String
-  accessKey AccessKey @relation( fields: [accessKeyId], references: [id], onDelete: Cascade )
+  accessKey   AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
   ip String?
 
@@ -242,15 +321,15 @@ model AccessLog {
 
   country String?
 
-city String?
+  city String?
 
-browser String?
+  browser String?
 
-os String?
+  os String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([accessKeyId])
-@@index([createdAt])
+  @@index([createdAt])
 }

@@ -1,20 +1,31 @@
 "use client";
 import { Globe, Lock } from "lucide-react";
 import { Typography } from "@workspace/ui/components/typography";
-import { useState } from "react";
 import { Card } from "@workspace/ui/components/card";
 import { OptionCard } from "@workspace/ui/components/option-card";
+import { usePortfolio } from "@/contexts/portfolio-context";
 
-type Props = {
-    value: "PUBLIC" | "PASSWORD";
-    onChange: (value: "PUBLIC" | "PASSWORD") => void;
-};
+export default function SiteVisibility() {
+    const {
+        portfolio,
+        updatePortfolio,
+    } = usePortfolio();
 
-export default function SiteVisibility({
-    value,
-    onChange,
-}: Props) {
+    async function handleVisibilityChange(
+        visibility: "PUBLIC" | "PASSWORD"
+    ) {
+        if (
+            portfolio?.visibility ===
+            visibility
+        ) {
+            return;
+        }
 
+        await updatePortfolio({
+            visibility,
+        });
+    }
+    
     return (
         <Card className="rounded-xl p-6 space-y-3">
             <div className="space-y-1">
@@ -31,10 +42,18 @@ export default function SiteVisibility({
 
             <div className="grid grid-cols-2 gap-4">
 
-              <OptionCard
-    selected={value === "PUBLIC"}
-    onClick={() => onChange("PUBLIC")}
->
+                <OptionCard
+                    className=" cursor-pointer"
+                    selected={
+                        portfolio?.visibility ===
+                        "PUBLIC"
+                    }
+                    onClick={() =>
+                        handleVisibilityChange(
+                            "PUBLIC"
+                        )
+                    }
+                >
                     <OptionCard.Header>
                         <Globe className="size-4" />
 
@@ -48,10 +67,18 @@ export default function SiteVisibility({
                     </OptionCard.Description>
                 </OptionCard>
 
-             <OptionCard
-    selected={value === "PASSWORD"}
-    onClick={() => onChange("PASSWORD")}
->
+                <OptionCard
+                    className=" cursor-pointer"
+                    selected={
+                        portfolio?.visibility ===
+                        "PASSWORD"
+                    }
+                    onClick={() =>
+                        handleVisibilityChange(
+                            "PASSWORD"
+                        )
+                    }
+                >
                     <OptionCard.Header>
                         <Lock className="size-4" />
 

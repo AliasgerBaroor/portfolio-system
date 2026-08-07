@@ -56,3 +56,8 @@
     transform: scale(1.03);
 
 }
+
+.gallery-dialog-overlay {
+    background: rgba(255, 255, 255, 0.50);
+    backdrop-filter: blur(26px);
+}

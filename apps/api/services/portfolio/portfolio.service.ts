@@ -1,3 +1,4 @@
+import { UpdatePortfolioDto } from "../../dto/portfolio/update-portfolio.dto";
 import { prisma } from "../../lib/prisma";
 
 export async function getPortfolio(
@@ -57,6 +58,34 @@ export async function createPortfolio(
             ownerId,
             title,
             slug,
+        },
+    });
+}
+
+export async function updatePortfolio(
+    userId: string,
+    data: UpdatePortfolioDto
+) {
+    const portfolio =
+        await prisma.portfolio.findFirst({
+            where: {
+                ownerId: userId,
+                deletedAt: null,
+            },
+        });
+
+    if (!portfolio) {
+        throw new Error(
+            "Portfolio not found."
+        );
+    }
+
+    return prisma.portfolio.update({
+        where: {
+            id: portfolio.id,
+        },
+        data: {
+            ...data,
         },
     });
 }

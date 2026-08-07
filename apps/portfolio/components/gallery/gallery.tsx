@@ -1,12 +1,13 @@
 "use client";
 import "./gallery.css";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { MasonryProps } from "masonic";
 
 import GalleryItem from "./gallery-item";
 import type { GalleryItem as Item } from "./gallery.types";
+import { GalleryPreviewDialog } from "./gallery-preview-dialog";
 
 const LOOP_COUNT = 100;
 
@@ -22,6 +23,9 @@ export default function Gallery({
 }: {
     items: Item[];
 }) {
+    const [selectedItem, setSelectedItem] =
+        useState<Item | null>(null);
+
     if (items.length === 0) {
         return null;
     }
@@ -43,15 +47,25 @@ export default function Gallery({
 
     return (
         <div className="gallery">
-        <Masonry
-            items={repeatedItems}
-            columnWidth={320}
-            columnGutter={16}
-                overscanBy={4}
+            <Masonry
+                items={repeatedItems}
+                columnWidth={320}
+                columnGutter={16}
                 render={({ data }) => (
-                    <GalleryItem data={data} />
+                    <GalleryItem
+                        data={data}
+                        onClick={() => setSelectedItem(data)}
+                    />
                 )}
-        />
+            />
+
+            <GalleryPreviewDialog
+                open={!!selectedItem}
+                item={selectedItem}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedItem(null);
+                }}
+            />
         </div>
     );
 }

@@ -27,8 +27,8 @@ export default function DashboardLayout({
 
         <FloatingNavigation>
 
-      <Navigation
-    items={{
+          <Navigation
+            items={{
               category: [
                 {
                   id: "all",
@@ -75,8 +75,8 @@ export default function DashboardLayout({
                   size: 24
                 },
               ]
-    }}
-/>
+            }}
+          />
 
         </FloatingNavigation>
       </section>

@@ -28,6 +28,13 @@ enum SectionType {
   CUSTOM
 }
 
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
 model Session {
   id String @id @default(cuid())
 
@@ -169,6 +176,8 @@ model Client {
 
   accessKeys ClientAccessKey[]
 
+  accessRequests ClientAccessRequest[]
+
   @@index([ownerId])
   @@index([email])
 }
@@ -240,6 +249,33 @@ model ClientAccessSession {
   @@index([accessKeyId])
 }
 
+model ClientAccessRequest {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  name    String
+  email   String
+  company String?
+
+  message String?
+
+  status AccessRequestStatus @default(PENDING)
+
+  reviewedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([portfolioId])
+  @@index([clientId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 model Portfolio {
   id String @id @default(cuid())
 
@@ -262,6 +298,8 @@ model Portfolio {
   accessRules PortfolioClientAccess[]
 
   sections PortfolioSection[]
+
+  accessRequests ClientAccessRequest[]
 
   updatedAt DateTime @updatedAt
 

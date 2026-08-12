@@ -1,20 +1,20 @@
 export const headerColors = {
   blue: {
-    foreground: "hsl(40 19% 6%)",
-    background: "hsl(208 100% 72%)",
-    border: "hsl(208 100% 72%)",
+    foreground: "var(--color-white)",
+    background: "var(--brand-color-1)",
+    border: "var(--brand-color-1)",
   },
 
   orange: {
-    foreground: "hsl(40 19% 6%)",
-    background: "hsl(29 100% 57%)",
-    border: "hsl(29 100% 57%)",
+    foreground: "var(--color-white)",
+    background: "var(--brand-color-2)",
+    border: "var(--brand-color-2)",
   },
 
   pink: {
-    foreground: "hsl(40 19% 6%)",
-    background: "hsl(326 85% 79%)",
-    border: "hsl(326 85% 79%)",
+    foreground: "var(--color-white)",
+    background: "var(--brand-color-3)",
+    border: "var(--brand-color-3)",
   },
 } as const;
 

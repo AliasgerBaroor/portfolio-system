@@ -1,37 +1,88 @@
-import * as React from "react"
-import { Input as InputPrimitive } from "@base-ui/react/input"
+import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
+import { Frame, type FrameRadius } from "./frame";
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <InputPrimitive
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-sm border border-input px-2.5 py-1",
-        "text-base md:text-sm font-sans",
-        "outline-none transition-all duration-150",
-        "placeholder:text-muted-foreground",
-
-        "focus-visible:border-primary",
-        "focus-visible:ring-1",
-        "focus-visible:ring-primary/20",
-
-        "disabled:pointer-events-none",
-        "disabled:cursor-not-allowed",
-        "disabled:bg-input/50",
-        "disabled:opacity-50",
-
-        "aria-invalid:border-destructive",
-        "aria-invalid:ring-1",
-        "aria-invalid:ring-destructive/20",
-
-        className
-      )}
-      {...props}
-    />
-  )
+interface InputProps extends React.ComponentProps<"input"> {
+  startContent?: React.ReactNode;
+  endContent?: React.ReactNode;
+  containerClassName?: string;
+  radius?: FrameRadius;
+  inputSize?: "sm" | "md" | "lg";
 }
 
-export { Input }
+function Input({
+  className,
+  containerClassName,
+  startContent,
+  endContent,
+  type,
+  inputSize = "lg",
+  radius = "pill",
+  ...props
+}: InputProps) {
+  
+  const inputSizeStyles = {
+    sm: "h-9",
+    md: "h-10",
+    lg: "h-14",
+  } as const;
+
+  return (
+    <Frame
+      strength="low"
+      radius={radius}
+      className={cn(
+        `flex w-full items-center overflow-hidden`,
+        inputSizeStyles[inputSize],
+        "bg-white",
+        containerClassName
+      )}
+    >
+      {startContent && (
+        <div className="flex shrink-0 items-center pl-5">
+          {startContent}
+        </div>
+      )}
+
+      <InputPrimitive
+        type={type}
+        data-slot="input"
+        style={{
+          caretColor: "var(--foreground)",
+        }}
+        className={cn(
+          "h-full min-w-0 flex-1 bg-transparent px-5 py-3",
+          "font-sans text-base text-foreground",
+          "caret-[var(--foreground)]",
+          "outline-none",
+          "placeholder:text-foreground",
+
+          // Autofill
+          "[&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_white]",
+          "[&:-webkit-autofill]:[-webkit-text-fill-color:var(--foreground)]",
+
+          // Disabled
+          "disabled:pointer-events-none",
+          "disabled:cursor-not-allowed",
+          "disabled:opacity-50",
+
+          // Invalid
+          "aria-invalid:text-destructive",
+
+          className
+        )}
+        {...props}
+      />
+
+      {endContent && (
+        <div className="flex shrink-0 items-center p-1 pb-2">
+          {endContent}
+        </div>
+      )}
+    </Frame>
+  );
+}
+
+export { Input };

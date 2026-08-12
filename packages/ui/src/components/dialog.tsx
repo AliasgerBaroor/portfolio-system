@@ -23,6 +23,19 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+function DialogPopup({
+  className,
+  ...props
+}: DialogPrimitive.Popup.Props) {
+  return (
+    <DialogPrimitive.Popup
+      data-slot="dialog-popup"
+      className={className}
+      {...props}
+    />
+  )
+}
+
 function DialogOverlay({
   className,
   ...props
@@ -155,8 +168,8 @@ export {
   DialogHeader,
   DialogOverlay,
   DialogPortal,
+  DialogPopup,
   DialogTitle,
   DialogTrigger,
-
   DialogPrimitive,
 }

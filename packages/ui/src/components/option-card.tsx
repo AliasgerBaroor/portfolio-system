@@ -17,12 +17,12 @@ function Root({
       type="button"
       aria-pressed={selected}
       className={cn(
-        "w-full rounded-lg border p-4 text-left transition-all duration-150",
+        "w-full border p-4 text-left transition-all duration-150",
         "focus-visible:outline-none",
-        "hover:border-primary/60",
+        "hover:border-border/60",
 
         selected
-          ? "border-primary bg-primary/5"
+          ? "border-border bg-primary/5"
           : "border-border",
 
         className

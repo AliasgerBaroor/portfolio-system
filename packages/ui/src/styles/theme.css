@@ -2,42 +2,48 @@
     /* ===== Surface ===== */
 
     --background: oklch(0.95 0.02 90);
-    --foreground: oklch(0.19 0.01 80);
+    --foreground: oklch(0.2365 0.01745 86.83);
+    --secondary-foreground: oklch(0.3732 0.0215 100.1);
+      --white: #fff;
 
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.19 0.01 80);
+    --card-foreground: oklch(0.2365 0.01745 86.83);
 
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.19 0.01 80);
+    --popover-foreground: oklch(0.2365 0.01745 86.83);
 
     /* ===== Brand ===== */
 
-    --primary: oklch(0.86 0.20 110);
-    --primary-foreground: oklch(0.19 0.01 80);
+    --primary: oklch(0.827 0.171 80.5);
+    --primary-foreground: oklch(0.2365 0.01745 86.83);
 
     --secondary: oklch(0.95 0.02 90);
-    --secondary-foreground: oklch(0.19 0.01 80);
+    --secondary-foreground: oklch(0.2365 0.01745 86.83);
 
     /* ===== Neutral UI ===== */
 
     --muted: oklch(0.92 0.01 90);
     --muted-foreground: oklch(0.45 0.005 67);
 
+    --divider: oklch(0.93 0.003 90);
     --border: oklch(0.80 0.01 90);
     --input: oklch(0.90 0.01 90);
-    --ring: oklch(0.86 0.20 110);
+    --ring: oklch(0.827 0.171 80.5);
 
     /* ===== Brand Accent Tokens ===== */
-
-    --accent-blue: oklch(0.78 0.10 238);
-    --accent-orange: oklch(0.76 0.17 53);
-    --accent-pink: oklch(0.83 0.11 352);
+  --brand-color-1: oklch(0.45077 0.17930 266.57);
+    --brand-color-2: oklch(0.6810 0.2020 34.5);
+    --brand-color-3: oklch(0.6518 0.2058 143.19);
 
     /* ===== Status ===== */
 
     --success: oklch(0.72 0.16 150);
     --warning: oklch(0.82 0.17 75);
     --destructive: oklch(0.64 0.22 28);
+
+    /* ===== Suportive ===== */
+
+    --color-white: #ffffff;
 
     /* ===== Radius ===== */
 

@@ -2,6 +2,7 @@
 import { icons } from "@workspace/ui/icons/registry";
 import type { NavigationItemProps } from "./floating-navigation.types";
 import { Typography } from "@workspace/ui/components/typography";
+import { Button } from "@workspace/ui/components/button";
 
 export default function NavigationItem({
     item,
@@ -19,27 +20,22 @@ export default function NavigationItem({
     };
 
     return (
-        <button
-            className={`group floating-navigation-item ${color.bg} hover:bg-primary cursor-pointer`} 
+        <Button
+            variant={active ? "active" : "navigation"}
             onClick={onClick}
         >
             {Icon && (
                 <Icon
                     width={item.size}
                     height={item.size}
-                    className={`${color.text} group-hover:text-foreground`}
                 />
             )}
 
-{
-                item.label && 
-            <Typography
-                variant="body-xl"
-                className={`${color.text} group-hover:text-foreground`}
-            >
-                {item.label}
-            </Typography>
-}
-        </button>
+            {item.label && (
+                <Typography variant="body-xl">
+                    {item.label}
+                </Typography>
+            )}
+        </Button>
     );
 }

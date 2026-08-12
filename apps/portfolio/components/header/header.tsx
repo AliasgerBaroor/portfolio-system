@@ -1,52 +1,47 @@
+"use client"
 import "./header.css";
 import { icons, IconName } from "@workspace/ui/icons/registry";
 import { HeaderColor, headerColors } from "@workspace/ui/colors/registry";
-
-type HeaderItemType = {
-  key: string;
-  url: string;
-  icon: IconName;
-  color: HeaderColor;
-};
+import { Frame } from "@workspace/ui/components/frame";
+import { useAboutDialogStore } from "@/stores/about-dialog-store";
+import { headerButtons, HeaderItemType } from "@/data/header";
+import { HeaderAction } from "./header-types";
 
 export default function Header() {
-  const items: HeaderItemType[] = [
-    {
-      key: "resume",
-      url: "/resume",
-      icon: "file",
-      color: "blue",
-    },
-    {
-      key: "preview",
-      url: "/preview",
-      icon: "logo",
-      color: "orange",
-    },
-    {
-      key: "mail",
-      url: "/mail",
-      icon: "envelope",
-      color: "pink",
-    },
-  ];
+  const open = useAboutDialogStore((state) => state.open);
+
+  const actions: Record<HeaderAction, () => void> = {
+    "open-about": open,
+    navigate: () => { },
+    none: () => { },
+  };
 
   return (
+    <Frame>
     <header className="flex items-start gap-3 bg-white p-2 rounded-pill">
-      {items.map((item) => (
-        <HeaderItem key={item.key} item={item} />
+        {headerButtons.map((item) => (
+          <HeaderItem key={item.key} item={item} onAction={item.action ? actions[item.action] : undefined} />
       ))}
     </header>
+    </Frame>
+
   );
 }
 
-function HeaderItem({ item }: { item: HeaderItemType }) {
+function HeaderItem({
+  item,
+  onAction,
+}: {
+  item: HeaderItemType;
+  onAction?: () => void;
+}) {
   const Icon = icons[item.icon];
   const colors = headerColors[item.color];
 
   return (
-    <div
+    <button
       className="header-item"
+      onClick={onAction}
       style={
         {
           "--header-bg": colors.background,
@@ -58,6 +53,6 @@ function HeaderItem({ item }: { item: HeaderItemType }) {
       <div className="header-item-inner">
         <Icon width={28} height={28} />
       </div>
-    </div>
+    </button>
   );
 }

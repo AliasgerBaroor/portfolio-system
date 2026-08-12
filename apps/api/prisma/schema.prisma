@@ -102,8 +102,8 @@ model Project {
 
   sortOrder Int @default(0)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   isPublished Boolean @default(false)
@@ -151,12 +151,37 @@ model ProjectClientAccess {
   @@index([accessKeyId])
 }
 
+model Client {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name    String
+  company String?
+  email   String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  accessKeys ClientAccessKey[]
+
+  @@index([ownerId])
+  @@index([email])
+}
+
 /// Password-protected access for clients.
 model ClientAccessKey {
   id String @id @default(cuid())
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   name String
 
@@ -168,15 +193,14 @@ model ClientAccessKey {
   expiresAt  DateTime
   lastSeenAt DateTime?
 
-  maxUses Int?
-
-  deviceLimit Int @default(1)
-
-  usedCount Int @default(0)
+  maxUses     Int?
+  deviceLimit Int  @default(1)
+  usedCount   Int  @default(0)
 
   isActive Boolean @default(true)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   sessions ClientAccessSession[]
@@ -184,11 +208,11 @@ model ClientAccessKey {
   portfolios PortfolioClientAccess[]
   projects   ProjectClientAccess[]
 
-  updatedAt  DateTime @updatedAt
   lastUsedAt DateTime?
   logs       ClientAccessLog[]
 
   @@index([ownerId])
+  @@index([clientId])
   @@index([accessToken])
 }
 
@@ -304,6 +328,7 @@ model User {
 
   portfolios Portfolio[]
   sessions   Session[]
+  clients    Client[]
   accessKeys ClientAccessKey[]
 
   lastLoginAt DateTime?

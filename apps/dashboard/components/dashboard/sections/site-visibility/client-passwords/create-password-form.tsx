@@ -15,10 +15,10 @@ export default function CreatePasswordForm({
     const [clientName, setClientName] = useState("");
 
     return (
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
             <Input
                 className="flex-1"
-                placeholder="e.g. Ain Watches"
+                placeholder="e.g. Logifex"
                 value={clientName}
                 onChange={(e) =>
                     setClientName(e.target.value)
@@ -26,6 +26,8 @@ export default function CreatePasswordForm({
             />
 
             <Button
+                size="sm"
+
                 onClick={() => {
                     onCreate(clientName);
                     setClientName("");
@@ -33,7 +35,7 @@ export default function CreatePasswordForm({
                 variant="secondary"
             >
                 <KeyRound className="size-4" />
-                Create Password
+                Create
             </Button>
         </div>
     );

@@ -9,7 +9,7 @@ function PublishStatus() {
 
             <Typography
                 variant="body-sm"
-                className="text-muted-foreground"
+                className="text-secondary-foreground"
             >
                 Your site isn't live yet.
             </Typography>

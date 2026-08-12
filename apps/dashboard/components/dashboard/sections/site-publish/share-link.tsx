@@ -16,12 +16,14 @@ export default function ShareLink() {
                     </Typography>
                 </div>
 
-               <Button variant="outline" size="sm"> <Copy /> Copy </Button>
+                <Button
+                variant="outline"
+                    size="sm"> <Copy /> Copy </Button>
             </div>
 
             <Typography
                 variant="caption"
-                className="text-muted-foreground"
+                className="text-secondary-foreground"
             >
                 Anyone with this link can access your portfolio.
             </Typography>

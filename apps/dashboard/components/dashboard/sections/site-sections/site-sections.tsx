@@ -32,13 +32,14 @@ export default function SiteSections() {
 
           <Typography
             variant="body-sm"
-            className="text-muted-foreground"
+            className="text-secondary-foreground"
           >
             Edit your portfolio sections.
           </Typography>
         </div>
 
         <Button
+        size="sm"
           variant="outline"
           onClick={() => setIsCreating(true)}
         >

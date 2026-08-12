@@ -9,7 +9,7 @@ export default function PasswordHeader() {
 
             <Typography
                 variant="body-sm"
-                className="text-muted-foreground"
+                className="text-secondary-foreground"
             >
                 Each password is tied to one client and expires after 24 hours.
             </Typography>

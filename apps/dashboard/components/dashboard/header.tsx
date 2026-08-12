@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@workspace/ui/components/button";
 import { Typography } from "@workspace/ui/components/typography";
-import { LogOut } from "lucide-react";
+import { LogOut, Rocket } from "lucide-react";
 import { Separator } from "@workspace/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
@@ -29,7 +29,7 @@ export default function Header() {
       <div className="space-y-1 flex flex-col gap-2">
         <Typography
           variant="overline"
-          className="tracking-[0.25em] text-muted-foreground"
+          className="tracking-[0.25em] text-secondary-foreground"
         >
           PORTFOLIO CONTROL
         </Typography>
@@ -51,7 +51,9 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="default" className="rounded-xs">
+          <Button size="sm">
+            <Rocket width={8} height={8} />
+
             Publish
           </Button>
 

@@ -114,7 +114,7 @@ export default function OnboardingPage() {
                             <FieldGroup className="space-y-3">
 
                                 <Field>
-                                    <FieldLabel className="font-medium text-muted-foreground">
+                                    <FieldLabel className="font-medium text-secondary-foreground">
                                         Portfolio Name
                                     </FieldLabel>
 
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                                 </Field>
 
                                 <Field>
-                                    <FieldLabel className="font-medium text-muted-foreground">
+                                    <FieldLabel className="font-medium text-secondary-foreground">
                                         Portfolio URL
                                     </FieldLabel>
 

@@ -46,20 +46,20 @@ function SiteName() {
     </Typography>
 
     <Typography
-      variant="body-sm"
-      className="text-muted-foreground"
+      variant="body-md"
+      className="text-secondary-foreground"
     >
       Shown as the title of your portfolio.
     </Typography>
   </div>
 
         <Input
+          inputSize="md"
           value={title}
           placeholder="Enter your site name"
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
+          onChange={(e) => setTitle(e.target.value)}
           onBlur={handleBlur}
+          radius="sm"
         />
 </Card>
     )

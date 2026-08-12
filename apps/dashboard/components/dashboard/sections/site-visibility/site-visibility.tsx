@@ -4,6 +4,7 @@ import { Typography } from "@workspace/ui/components/typography";
 import { Card } from "@workspace/ui/components/card";
 import { OptionCard } from "@workspace/ui/components/option-card";
 import { usePortfolio } from "@/contexts/portfolio-context";
+import { Frame } from "@workspace/ui/components/frame";
 
 export default function SiteVisibility() {
     const {
@@ -27,21 +28,22 @@ export default function SiteVisibility() {
     }
     
     return (
-        <Card className="rounded-xl p-6 space-y-3">
+        <Card className="p-6 space-y-3">
             <div className="space-y-1">
                 <Typography variant="heading-xs">
                     Visibility
                 </Typography>
                 <Typography
                     variant="body-sm"
-                    className="text-muted-foreground"
+                    className="text-secondary-foreground"
                 >
                     Choose who can open your portfolio once it's live.
                 </Typography>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
 
+            <div className="grid grid-cols-2 gap-4">
+                    <Frame strength="low" radius="sm">
                 <OptionCard
                     className=" cursor-pointer"
                     selected={
@@ -66,7 +68,8 @@ export default function SiteVisibility() {
                         Anyone with the link can view it.
                     </OptionCard.Description>
                 </OptionCard>
-
+                </Frame>
+                <Frame strength="low" radius="sm">
                 <OptionCard
                     className=" cursor-pointer"
                     selected={
@@ -91,6 +94,7 @@ export default function SiteVisibility() {
                         Visitors must enter a client password.
                     </OptionCard.Description>
                 </OptionCard>
+                </Frame>
 
             </div>
         </Card>

@@ -7,11 +7,10 @@ function PublishButton() {
     const [isCreating, setIsCreating] = useState(false);
 
     return (
-        <Button
-            variant="default"
+        <Button size="sm"
             onClick={() => setIsCreating(true)}
         >
-            <Rocket />
+            <Rocket width={8} height={8} />
             Publish site
         </Button>
     )

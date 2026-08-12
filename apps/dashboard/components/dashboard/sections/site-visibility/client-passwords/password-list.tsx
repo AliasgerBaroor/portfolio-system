@@ -1,8 +1,9 @@
 import PasswordRow from "./password-row";
-import { ClientPassword } from "./types";
+
+import type { ClientAccessKey } from "@/types/client-access-key";
 
 interface Props {
-    passwords: ClientPassword[];
+    passwords: ClientAccessKey[];
 }
 
 export default function PasswordList({

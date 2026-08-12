@@ -1,30 +1,27 @@
 "use client";
 
 import { Card } from "@workspace/ui/components/card";
-import { useState } from "react";
 
 import PasswordHeader from "./password-header";
 import CreatePasswordForm from "./create-password-form";
 import PasswordList from "./password-list";
 import EmptyPasswords from "./empty-passwords";
 
-import { ClientPassword } from "./types";
+import { useClientAccessKeys } from "@/contexts/client-access-key-context";
 
 export default function ClientPasswords() {
-    const [passwords, setPasswords] = useState<ClientPassword[]>([]);
+    const {
+        accessKeys,
+        loading,
+        createClientAccessKey,
+    } = useClientAccessKeys();
 
-    function createPassword(clientName: string) {
-        const newPassword: ClientPassword = {
-            id: crypto.randomUUID(),
-            clientName,
-            password: "A9X2-KP1M",
-            expiresAt: new Date(),
-        };
-
-        setPasswords((prev) => [
-            newPassword,
-            ...prev,
-        ]);
+    async function createPassword(
+        clientName: string
+    ) {
+        await createClientAccessKey({
+            name: clientName,
+        });
     }
 
     return (
@@ -36,11 +33,15 @@ export default function ClientPasswords() {
                 onCreate={createPassword}
             />
 
-            {passwords.length === 0 ? (
+            {loading ? (
+                <div>
+                    Loading client passwords...
+                </div>
+            ) : accessKeys.length === 0 ? (
                 <EmptyPasswords />
             ) : (
                 <PasswordList
-                    passwords={passwords}
+                    passwords={accessKeys}
                 />
             )}
 

@@ -1,4 +1,7 @@
 "use client";
+import { Frame } from "@workspace/ui/components/frame";
+import { Typography } from "@workspace/ui/components/typography";
+import { LockIcon } from "@workspace/ui/icons/lock";
 
 import { useState } from "react";
 import { cn } from "@workspace/ui/lib/utils";
@@ -7,20 +10,14 @@ import { Button } from "@workspace/ui/components/button";
 
 import {
     Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
 } from "@workspace/ui/components/card";
 
 import {
     Field,
     FieldGroup,
-    FieldLabel,
 } from "@workspace/ui/components/field";
 
 import { Input } from "@workspace/ui/components/input";
-import Link from "next/link";
 
 import { useRouter } from "next/navigation";
 
@@ -60,85 +57,98 @@ export function LoginForm({
     }
 
     return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card>
-                <CardHeader className="pb-6">
+        <main className={cn("relative min-h-screen overflow-hidden", className)}  {...props}>
+            {/* Background image */}
+            <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                    backgroundImage: "url('/images/auth/login-bg.webp')",
+                }}
+            />
 
-                    <CardTitle className="font-heading">
-                        Login to your account
-                    </CardTitle>
-                    <CardDescription className="font-sans">
-                        Enter your email below to login to your account
-                    </CardDescription>
-                </CardHeader>
+            {/* Login content */}
+            <div className="relative z-10 flex min-h-screen items-center justify-center">
+                <div className="w-full max-w-xl">
+                    <Card className="w-full p-10">
+                        <div className="flex flex-col gap-6">
+                            {/* Lock */}
+                            <div className="flex justify-center">
+                                <Frame strength="high" shift={2} className="p-7 bg-primary">
+                                    <LockIcon />
+                                </Frame>
+                            </div>
 
-                <CardContent className="pt-0 px-8 pb-4" >
-                    <form onSubmit={handleLogin}>
-                        <FieldGroup className="space-y-3">
-                            <Field>
-                                <FieldLabel className="font-medium text-muted-foreground">Email</FieldLabel>
-                                <Input
-                                    type="email"
-                                    placeholder="m@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    disabled={loginLoading}
-                                />
-                            </Field>
+                            {/* Heading */}
+                            <Typography
+                                variant="heading-lg"
+                                className="text-center"
+                            >
+                                Please enter credentials to
+                                <br />
+                                acess dashboard
+                            </Typography>
 
-                            <Field>
-                                <div className="flex items-center">
-                                    <FieldLabel className="font-medium text-muted-foreground">Password</FieldLabel>
-
-                                    <Link
-                                        href="/forgot-password"
-                                        className="ml-auto text-sm hover:underline font-sans"
-                                    >
-                                        Forgot Password?
-                                    </Link>
-                                </div>
-
-                                <Input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    disabled={loginLoading}
-                                />
-                            </Field>
-
-                            {
-                                error && (
-                                    <p className="text-sm text-destructive">
-                                        {error}
-                                    </p>
-                                )
-                            }
-
-                            <Field>
-                                <div className="flex gap-2">
-                                    <Button
-                                        className="flex-1 h-10"
-                                        type="submit"
+                            {/* Password */}
+                            <form onSubmit={handleLogin}>
+                                <FieldGroup className="space-y-3">
+                                <Field>
+                                    <Input
+                                            type="email"
+                                            placeholder="a@logifex.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            disabled={loginLoading}
+                                    />
+                                </Field>
+                                <Field>
+                                    <Input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         disabled={loginLoading}
-                                    >
-                                        {loginLoading
-                                            ? "Logging in..."
-                                            : "Login"}
-                                    </Button>
+                                        placeholder="Enter password"
+                                    />
+                                </Field>
+                                    {
+                                        error && (
+                                            <p className="text-sm text-destructive">
+                                                {error}
+                                            </p>
+                                        )
+                                    }
 
-                                    <Button
-                                        className="flex-1 h-10"
-                                        variant="outline"
-                                        type="button"
-                                    >
-                                        Login with Google
-                                    </Button>
-                                </div>
-                            </Field>
-                        </FieldGroup>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
+                                    <Field>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                className="flex-1 h-10"
+                                                type="submit"
+                                                disabled={loginLoading}
+                                            >
+                                                {loginLoading
+                                                    ? "Logging in..."
+                                                    : "Login"}
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-10"
+                                                type="submit"
+                                                variant="secondary"
+                                                disabled={true}
+                                                onProgress={(e) => {return}}
+                                            >
+                                                {loginLoading
+                                                    ? "Logging in..."
+                                                    : "Login with google"}
+                                            </Button>
+
+                                        </div>
+                                    </Field>
+
+                                </FieldGroup>
+                            </form>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        </main>
     );
 }

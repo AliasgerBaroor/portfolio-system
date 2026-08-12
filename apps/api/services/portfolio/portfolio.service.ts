@@ -89,3 +89,36 @@ export async function updatePortfolio(
         },
     });
 }
+
+export async function publishPortfolio(
+    userId: string
+) {
+    const portfolio =
+        await prisma.portfolio.findFirst({
+            where: {
+                ownerId: userId,
+                deletedAt: null,
+            },
+        });
+
+    if (!portfolio) {
+        throw new Error(
+            "Portfolio not found."
+        );
+    }
+
+    if (portfolio.isArchived) {
+        throw new Error(
+            "Archived portfolio cannot be published."
+        );
+    }
+
+    return prisma.portfolio.update({
+        where: {
+            id: portfolio.id,
+        },
+        data: {
+            isPublished: true,
+        },
+    });
+}

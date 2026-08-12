@@ -102,17 +102,19 @@ model Project {
 
   sortOrder Int @default(0)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   deletedAt DateTime?
 
   isPublished Boolean @default(false)
   isArchived  Boolean @default(false)
 
-  accessRules ProjectAccess[]
+  accessRules ProjectClientAccess[]
 
   details       ProjectOverview?
   galleryImages ProjectGalleryImage[]
+
+  tags ProjectTagAssignment[]
 
   @@index([portfolioId])
   @@index([slug])
@@ -123,11 +125,11 @@ model Project {
 //ProjectMetric
 //ProjectTechnology
 
-model PortfolioAccess {
+model PortfolioClientAccess {
   accessKeyId String
   portfolioId String
 
-  accessKey AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+  accessKey ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
@@ -136,11 +138,11 @@ model PortfolioAccess {
   @@index([accessKeyId])
 }
 
-model ProjectAccess {
+model ProjectClientAccess {
   accessKeyId String
   projectId   String
 
-  accessKey AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+  accessKey ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
@@ -150,7 +152,7 @@ model ProjectAccess {
 }
 
 /// Password-protected access for clients.
-model AccessKey {
+model ClientAccessKey {
   id String @id @default(cuid())
 
   ownerId String
@@ -158,10 +160,12 @@ model AccessKey {
 
   name String
 
-  passwordHash String
-  accessToken  String @unique
+  passwordHash      String
+  encryptedPassword String
 
-  expiresAt  DateTime?
+  accessToken String @unique
+
+  expiresAt  DateTime
   lastSeenAt DateTime?
 
   maxUses Int?
@@ -172,27 +176,29 @@ model AccessKey {
 
   isActive Boolean @default(true)
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
   deletedAt DateTime?
 
-  sessions AccessKeySession[]
+  sessions ClientAccessSession[]
 
-  portfolios PortfolioAccess[]
-  projects   ProjectAccess[]
+  portfolios PortfolioClientAccess[]
+  projects   ProjectClientAccess[]
 
-  updatedAt  DateTime    @updatedAt
+  updatedAt  DateTime @updatedAt
   lastUsedAt DateTime?
-  logs       AccessLog[]
+  logs       ClientAccessLog[]
 
   @@index([ownerId])
   @@index([accessToken])
 }
 
-model AccessKeySession {
+model ClientAccessSession {
   id String @id @default(cuid())
 
   accessKeyId String
-  accessKey   AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+  accessKey   ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  sessionTokenHash String @unique
 
   fingerprint String
 
@@ -229,7 +235,7 @@ model Portfolio {
 
   projects Project[]
 
-  accessRules PortfolioAccess[]
+  accessRules PortfolioClientAccess[]
 
   sections PortfolioSection[]
 
@@ -298,18 +304,18 @@ model User {
 
   portfolios Portfolio[]
   sessions   Session[]
-  accessKeys AccessKey[]
+  accessKeys ClientAccessKey[]
 
   lastLoginAt DateTime?
 
   @@index([username])
 }
 
-model AccessLog {
+model ClientAccessLog {
   id String @id @default(cuid())
 
   accessKeyId String
-  accessKey   AccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+  accessKey   ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
 
   ip String?
 
@@ -332,4 +338,27 @@ model AccessLog {
 
   @@index([accessKeyId])
   @@index([createdAt])
+}
+
+model ProjectTag {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  projects ProjectTagAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectTagAssignment {
+  projectId String
+  tagId     String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tag ProjectTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
 }

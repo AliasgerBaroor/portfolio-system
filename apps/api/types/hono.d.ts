@@ -12,8 +12,15 @@ export interface AuthUser {
     deletedAt: Date | null;
 }
 
+import type { ClientAccessSession, ClientAccessKey } from "@prisma/client";
+
 declare module "hono" {
     interface ContextVariableMap {
         user: AuthUser;
+
+        clientAccessSession:
+        ClientAccessSession & {
+            accessKey: ClientAccessKey;
+        };
     }
 }

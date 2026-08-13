@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
+import { Loader } from "@workspace/ui/components/loader";
 import { Typography } from "@workspace/ui/components/typography";
 
 import {
@@ -16,13 +17,21 @@ import type { ClientAccessKey } from "@/types/client-access-key";
 
 interface Props {
     password: ClientAccessKey;
+
+    onRevoke: (
+        accessKeyId: string
+    ) => Promise<void>;
 }
 
 export default function PasswordRow({
     password,
+    onRevoke,
 }: Props) {
+
     const [passVisible, setPassVisible] =
         useState(false);
+    const [revoking, setRevoking] = useState(false);
+
 
     const expired =
         !password.isActive ||
@@ -45,6 +54,22 @@ export default function PasswordRow({
             password.password
         );
     }
+
+
+    async function handleRevoke() {
+        if (revoking) {
+            return;
+        }
+
+        try {
+            setRevoking(true);
+
+            await onRevoke(password.id);
+        } finally {
+            setRevoking(false);
+        }
+    }
+
     return (
         <div className="flex items-center justify-between gap-4 rounded-xs border border-border bg-muted/30 px-4 py-3">
 
@@ -138,8 +163,15 @@ export default function PasswordRow({
                 <Button
                     variant="ghost"
                     size="icon-sm"
+                    disabled={revoking || !canUsePassword}
+                    onClick={handleRevoke}
+                    title="Revoke access"
                 >
-                    <Trash2 className="size-4" />
+                    {revoking ? (
+                        <Loader className="size-4 animate-spin" />
+                    ) : (
+                        <Trash2 className="size-4" />
+                    )}
                 </Button>
 
             </div>

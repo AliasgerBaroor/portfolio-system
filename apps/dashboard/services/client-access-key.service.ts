@@ -27,6 +27,20 @@ class ClientAccessKeyService {
 
         return response.data;
     }
+
+    async revokeClientAccessKey(
+        accessKeyId: string
+    ) {
+        const response =
+            await api.delete<{
+                success: boolean;
+                id: string;
+            }>(
+                `/client-access/${accessKeyId}`
+            );
+
+        return response.data;
+    }
 }
 
 export const clientAccessKeyService =

@@ -5,6 +5,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { AuthProvider } from "@/contexts/auth-context";
 import { PortfolioProvider } from "@/contexts/portfolio-context";
 import { ClientAccessKeyProvider } from "@/contexts/client-access-key-context";
+import { ClientProvider } from "@/contexts/client-context";
 
 const switzer = localFont({
   src: [
@@ -128,9 +129,13 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <PortfolioProvider>
-          <ClientAccessKeyProvider>
-        <ThemeProvider>{children}</ThemeProvider>
-          </ClientAccessKeyProvider>
+            <ClientProvider>
+              <ClientAccessKeyProvider>
+                <ThemeProvider>
+                  {children}
+                </ThemeProvider>
+              </ClientAccessKeyProvider>
+            </ClientProvider>
           </PortfolioProvider>
         </AuthProvider>
       </body>

@@ -19,7 +19,7 @@ export type ClientAccessKey = {
 };
 
 export type CreateClientAccessKeyRequest = {
-    name: string;
+    clientId: string;
 };
 
 export type CreateClientAccessKeyResponse = {

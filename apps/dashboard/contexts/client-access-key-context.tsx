@@ -31,6 +31,10 @@ type ClientAccessKeyContextType = {
     createClientAccessKey: (
         data: CreateClientAccessKeyRequest
     ) => Promise<CreateClientAccessKeyResponse>;
+
+    revokeClientAccessKey: (
+        accessKeyId: string
+    ) => Promise<void>;
 };
 
 const ClientAccessKeyContext =
@@ -98,6 +102,21 @@ export function ClientAccessKeyProvider({
         return response;
     }
 
+    async function revokeClientAccessKey(
+        accessKeyId: string
+    ) {
+        await clientAccessKeyService.revokeClientAccessKey(
+            accessKeyId
+        );
+
+        setAccessKeys((prev) =>
+            prev.filter(
+                (accessKey) =>
+                    accessKey.id !== accessKeyId
+            )
+        );
+    }
+
     useEffect(() => {
         async function loadAccessKeys() {
             if (initializing) {
@@ -127,6 +146,7 @@ export function ClientAccessKeyProvider({
             loading,
             getClientAccessKeys,
             createClientAccessKey,
+            revokeClientAccessKey,
         }),
         [accessKeys, loading]
     );

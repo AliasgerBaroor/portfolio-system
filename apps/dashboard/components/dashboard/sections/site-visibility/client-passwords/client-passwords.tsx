@@ -8,19 +8,26 @@ import PasswordList from "./password-list";
 import EmptyPasswords from "./empty-passwords";
 
 import { useClientAccessKeys } from "@/contexts/client-access-key-context";
+import { useClients } from "@/contexts/client-context";
 
 export default function ClientPasswords() {
+    const {
+        clients,
+        loading: clientsLoading,
+    } = useClients();
+
     const {
         accessKeys,
         loading,
         createClientAccessKey,
+        revokeClientAccessKey,
     } = useClientAccessKeys();
 
     async function createPassword(
-        clientName: string
+        clientId: string
     ) {
         await createClientAccessKey({
-            name: clientName,
+            clientId,
         });
     }
 
@@ -30,19 +37,25 @@ export default function ClientPasswords() {
             <PasswordHeader />
 
             <CreatePasswordForm
+                clients={clients}
                 onCreate={createPassword}
+                disabled={clientsLoading}
             />
-
-            {loading ? (
+            {clientsLoading ? (
+                <div>
+                    Loading clients...
+                </div>
+            ) : loading ? (
                 <div>
                     Loading client passwords...
                 </div>
             ) : accessKeys.length === 0 ? (
                 <EmptyPasswords />
             ) : (
-                <PasswordList
-                    passwords={accessKeys}
-                />
+                            <PasswordList
+                                passwords={accessKeys}
+                                onRevoke={revokeClientAccessKey}
+                            />
             )}
 
         </Card>

@@ -49,6 +49,22 @@ export async function createClientAccessKey(
             24 * 60 * 60 * 1000
         );
 
+    const client =
+        await prisma.client.findFirst({
+            where: {
+                id: data.clientId,
+                ownerId: userId,
+                deletedAt: null,
+                isActive: true,
+            },
+        });
+
+    if (!client) {
+        throw new Error(
+            "Client not found."
+        );
+    }
+
 
     const accessKey =
         await prisma.$transaction(
@@ -57,7 +73,8 @@ export async function createClientAccessKey(
                     await tx.clientAccessKey.create({
                         data: {
                             ownerId: userId,
-                            name: data.name,
+                            clientId: client.id,
+                            name: client.name,
                             passwordHash,
                             encryptedPassword,
                             accessToken,

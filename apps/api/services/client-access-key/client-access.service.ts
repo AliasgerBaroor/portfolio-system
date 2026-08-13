@@ -79,45 +79,55 @@ export async function loginClientAccess(
         }
     }
 
+    /*
+     * No valid access key matched
+     */
     if (!matchedAccessKey) {
-        await prisma.clientAccessLog.create({
-            data: {
-                accessKeyId:
-                    accessRules[0]?.accessKeyId ?? "",
-                fingerprint,
-                ip,
-                userAgent,
-                success: false,
-            },
-        });
+        const firstAccessRule =
+            accessRules.at(0);
+
+        if (firstAccessRule) {
+            await prisma.clientAccessLog.create({
+                data: {
+                    accessKeyId:
+                        firstAccessRule.accessKeyId,
+
+                    fingerprint,
+                    ip,
+                    userAgent,
+                    success: false,
+                },
+            });
+        }
 
         throw new Error(
             "Invalid portfolio access."
         );
     }
 
+    /*
+     * From this point onward TypeScript knows
+     * the access key exists.
+     */
+    const accessKey = matchedAccessKey;
+
+    /*
+     * Remove an existing session for this
+     * same device so we can issue a fresh token.
+     */
     const existingSession =
         await prisma.clientAccessSession.findUnique({
             where: {
                 accessKeyId_fingerprint: {
                     accessKeyId:
-                        matchedAccessKey.id,
+                        accessKey.id,
+
                     fingerprint,
                 },
             },
         });
 
     if (existingSession) {
-        if (
-            existingSession.expiresAt > now
-        ) {
-            return {
-                sessionToken: undefined,
-                expiresAt:
-                    existingSession.expiresAt,
-            };
-        }
-
         await prisma.clientAccessSession.delete({
             where: {
                 id: existingSession.id,
@@ -125,11 +135,15 @@ export async function loginClientAccess(
         });
     }
 
+    /*
+     * Check device limit.
+     */
     const activeSessions =
         await prisma.clientAccessSession.count({
             where: {
                 accessKeyId:
-                    matchedAccessKey.id,
+                    accessKey.id,
+
                 expiresAt: {
                     gt: now,
                 },
@@ -138,13 +152,16 @@ export async function loginClientAccess(
 
     if (
         activeSessions >=
-        matchedAccessKey.deviceLimit
+        accessKey.deviceLimit
     ) {
         throw new Error(
             "This client password is already being used on another device."
         );
     }
 
+    /*
+     * Generate a new client session token.
+     */
     const sessionToken =
         generateClientSessionToken();
 
@@ -153,6 +170,10 @@ export async function loginClientAccess(
             sessionToken
         );
 
+    /*
+     * Create session + audit log + usage update
+     * atomically.
+     */
     const session =
         await prisma.$transaction(
             async (tx) => {
@@ -160,7 +181,7 @@ export async function loginClientAccess(
                     await tx.clientAccessSession.create({
                         data: {
                             accessKeyId:
-                                matchedAccessKey!.id,
+                                accessKey.id,
 
                             sessionTokenHash,
 
@@ -171,14 +192,14 @@ export async function loginClientAccess(
                             userAgent,
 
                             expiresAt:
-                                matchedAccessKey!.expiresAt,
+                                accessKey.expiresAt,
                         },
                     });
 
                 await tx.clientAccessLog.create({
                     data: {
                         accessKeyId:
-                            matchedAccessKey!.id,
+                            accessKey.id,
 
                         fingerprint,
 
@@ -192,7 +213,7 @@ export async function loginClientAccess(
 
                 await tx.clientAccessKey.update({
                     where: {
-                        id: matchedAccessKey!.id,
+                        id: accessKey.id,
                     },
 
                     data: {
@@ -212,6 +233,7 @@ export async function loginClientAccess(
 
     return {
         sessionToken,
-        expiresAt: session.expiresAt,
+        expiresAt:
+            session.expiresAt,
     };
 }

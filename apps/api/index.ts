@@ -5,6 +5,7 @@ import { serve } from "@hono/node-server";
 import auth from "./routes/auth";
 import portfolio from "./routes/portfolio";
 import clientAccessKey from "./routes/client-access";
+import client from "./routes/client/";
 
 const app = new Hono();
 
@@ -21,6 +22,11 @@ app.use(
 
 app.route("/auth", auth);
 app.route("/portfolio", portfolio);
+
+app.route(
+  "/clients",
+  client
+);
 app.route(
   "/client-access",
   clientAccessKey

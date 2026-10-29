@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { setCookie } from "hono/cookie";
+import { setRefreshCookie } from "../../lib/cookies";
 
 import { LoginSchema } from "../../validators/auth";
 
@@ -30,13 +30,15 @@ login.post("/", async (c) => {
             password
         );
 
-        setCookie(c, "refresh_token", auth.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 30,
-        });
+        setRefreshCookie(c, auth.refreshToken);
+
+        // setCookie(c, "refresh_token", auth.refreshToken, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === "production",
+        //     sameSite: "Lax",
+        //     path: "/",
+        //     maxAge: 60 * 60 * 24 * 30,
+        // });
 
         console.log("auth.accessToken", auth.accessToken);
         

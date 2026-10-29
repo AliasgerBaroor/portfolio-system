@@ -4,8 +4,6 @@ import { prisma } from "../../lib/prisma";
 
 import { generateClientPassword } from "../../utils/generate-client-password";
 
-import { generateAccessToken } from "../../utils/generate-access-token";
-
 import type { CreateClientAccessKeyDto } from "../../dto/client-access/create-client-access-key.dto";
 
 import {
@@ -63,8 +61,6 @@ export async function createClientAccessKey(
     const encryptedPassword =
         encryptClientPassword(password);
 
-    const accessToken = generateAccessToken();
-
     const credentialId =
         generateClientCredentialId();
 
@@ -80,7 +76,6 @@ export async function createClientAccessKey(
                         ownerId: userId,
                         clientId: client.id,
                         name: client.name,
-                        accessToken,
                         credentialId,
                         passwordHash,
                         encryptedPassword,

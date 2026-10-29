@@ -11,14 +11,18 @@
       }
     ]
   },
-  "include": [
-    "next-env.d.ts",
-    "next.config.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-, "../../packages/ui/src/components/layout/inline-editor.tsx", "components/header/sections/site-visibility/client-passwords/client-passwords.tsx", "../../packages/ui/src/icons/placeholder.tsx", "../dashboard/components/protected-shell.tsx", "../../exclude/layout.tsx"  ],
-  "exclude": ["node_modules"]
+ "include": [
+  "next-env.d.ts",
+  "next.config.ts",
+  "**/*.ts",
+  "**/*.tsx",
+  "**/*.mts",
+  ".next/types/**/*.ts",
+  ".next/dev/types/**/*.ts",
+  "../../packages/ui/src/components/layout/inline-editor.tsx",
+  "components/header/sections/site-visibility/client-passwords/client-passwords.tsx"
+],
+"exclude": [
+  "node_modules"
+]
 }

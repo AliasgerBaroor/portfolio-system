@@ -7,10 +7,14 @@ import type {
 } from "@/types/client-access-key";
 
 class ClientAccessKeyService {
-    async getClientAccessKeys() {
+
+    async getClientAccessKeys(portfolioId: string) {
         const response =
             await api.get<GetClientAccessKeysResponse>(
-                "/client-access"
+                "/client-access",
+                {
+                    params: { portfolioId },
+                },
             );
 
         return response.data;

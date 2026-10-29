@@ -1,4 +1,4 @@
 export interface IndustryTag {
-    id: string;
+    label: string;
     name: string;
 }

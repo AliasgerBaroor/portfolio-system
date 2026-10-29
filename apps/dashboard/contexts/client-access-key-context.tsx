@@ -20,13 +20,22 @@ import type {
 import axios from "axios";
 
 import { useAuth } from "@/contexts/auth-context";
+import { usePortfolio } from "./portfolio-context";
 
 type ClientAccessKeyContextType = {
     accessKeys: ClientAccessKey[];
 
     loading: boolean;
 
-    getClientAccessKeys: () => Promise<void>;
+    selectedCredentialId: string | null;
+
+    setSelectedCredentialId: (
+        credentialId: string | null
+    ) => void;
+
+    getClientAccessKeys: (
+        portfolioId: string,
+    ) => Promise<void>;
 
     createClientAccessKey: (
         data: CreateClientAccessKeyRequest
@@ -52,20 +61,36 @@ export function ClientAccessKeyProvider({
         initializing,
     } = useAuth();
 
+    const {
+        portfolio,
+        loading: portfolioLoading,
+    } = usePortfolio();
+
+    const portfolioId = portfolio?.id ?? null;
+
     const [accessKeys, setAccessKeys] =
         useState<ClientAccessKey[]>([]);
 
     const [loading, setLoading] =
         useState(true);
 
-    async function getClientAccessKeys() {
+    /*
+     * Currently selected credential.
+     */
+    const [
+        selectedCredentialId,
+        setSelectedCredentialId,
+    ] =
+        useState<string | null>(null);
+
+    async function getClientAccessKeys(
+        id: string,
+    ) {
         try {
             const response =
-                await clientAccessKeyService.getClientAccessKeys();
+                await clientAccessKeyService.getClientAccessKeys(id);
 
-            setAccessKeys(
-                response.accessKeys
-            );
+            setAccessKeys(response.accessKeys);
         } catch (error) {
             if (
                 axios.isAxiosError(error) &&
@@ -94,10 +119,21 @@ export function ClientAccessKeyProvider({
             password: response.password,
         };
 
+        /*
+         * Newest credential goes first.
+         */
         setAccessKeys((prev) => [
             accessKey,
             ...prev,
         ]);
+
+        /*
+         * Automatically select the newly
+         * created credential.
+         */
+        setSelectedCredentialId(
+            accessKey.id
+        );
 
         return response;
     }
@@ -112,44 +148,146 @@ export function ClientAccessKeyProvider({
         setAccessKeys((prev) =>
             prev.filter(
                 (accessKey) =>
-                    accessKey.id !== accessKeyId
+                    accessKey.id !==
+                    accessKeyId
             )
+        );
+
+        /*
+         * If the deleted/revoked credential
+         * was selected, clear selection.
+         */
+        setSelectedCredentialId(
+            (current) =>
+                current === accessKeyId
+                    ? null
+                    : current
         );
     }
 
+    /*
+     * Load access keys.
+     */
+
     useEffect(() => {
+        let cancelled = false;
+
         async function loadAccessKeys() {
-            if (initializing) {
+            if (initializing || portfolioLoading) {
                 return;
             }
 
-            if (!authenticated) {
+            if (!authenticated || !portfolioId) {
                 setAccessKeys([]);
+                setSelectedCredentialId(null);
                 setLoading(false);
                 return;
             }
 
             setLoading(true);
 
-            await getClientAccessKeys();
+            try {
+                await getClientAccessKeys(portfolioId);
+            } catch (error) {
+                if (!cancelled) {
+                    console.error(
+                        "Failed to load client access keys:",
+                        error,
+                    );
+                    setLoading(false);
+                }
+            }
         }
 
-        loadAccessKeys();
+        void loadAccessKeys();
+
+        return () => {
+            cancelled = true;
+        };
     }, [
         authenticated,
         initializing,
+        portfolioLoading,
+        portfolioId,
+    ]);
+    
+    /*
+     * Automatically select the first
+     * active/non-expired credential.
+     *
+     * Since newly-created keys are inserted
+     * at index 0, this normally means the
+     * latest valid credential.
+     */
+    useEffect(() => {
+        if (
+            selectedCredentialId !== null
+        ) {
+            const selectedKey =
+                accessKeys.find(
+                    (key) =>
+                        key.id ===
+                        selectedCredentialId
+                );
+
+            const selectedKeyStillValid =
+                selectedKey &&
+                selectedKey.isActive &&
+                (
+                    selectedKey.expiresAt ===
+                    null ||
+                    new Date(
+                        selectedKey.expiresAt
+                    ) > new Date()
+                );
+
+            if (
+                selectedKeyStillValid
+            ) {
+                return;
+            }
+        }
+
+        const latestValidKey =
+            accessKeys.find(
+                (key) =>
+                    key.isActive &&
+                    (
+                        key.expiresAt ===
+                        null ||
+                        new Date(
+                            key.expiresAt
+                        ) > new Date()
+                    )
+            );
+
+        setSelectedCredentialId(
+            latestValidKey?.id ?? null
+        );
+    }, [
+        accessKeys,
+        selectedCredentialId,
     ]);
 
-    const value = useMemo(
-        () => ({
-            accessKeys,
-            loading,
-            getClientAccessKeys,
-            createClientAccessKey,
-            revokeClientAccessKey,
-        }),
-        [accessKeys, loading]
-    );
+    const value =
+        useMemo(
+            () => ({
+                accessKeys,
+                loading,
+
+                selectedCredentialId,
+                setSelectedCredentialId,
+
+                getClientAccessKeys,
+                createClientAccessKey,
+                revokeClientAccessKey,
+            }),
+            [
+                accessKeys,
+                loading,
+                selectedCredentialId,
+            ]
+        );
 
     return (
         <ClientAccessKeyContext.Provider

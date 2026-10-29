@@ -1,5 +1,5 @@
 import { Frame } from "@workspace/ui/components/frame";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 
 interface ProjectTagChipProps {
     name: string;

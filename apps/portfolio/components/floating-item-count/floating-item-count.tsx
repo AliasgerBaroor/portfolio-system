@@ -2,7 +2,7 @@
 
 import { Frame } from "@workspace/ui/components/frame";
 import { ProgressIcon } from "@workspace/ui/icons/progress";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { useGalleryRevealStore } from "@/stores/gallery-reveal-store";
 
 interface FloatingItemCountProps {
@@ -24,11 +24,12 @@ export function FloatingItemCount({
             strength="medium"
             radius="pill"
             className="
+                hidden
+                lg:flex
                 fixed
                 left-8
                 bottom-8
                 z-50
-                flex
                 items-center
                 gap-3
                 px-4

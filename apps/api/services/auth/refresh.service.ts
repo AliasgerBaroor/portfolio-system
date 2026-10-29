@@ -1,8 +1,9 @@
+
 import { prisma } from "../../lib/prisma";
 import { hashToken } from "../../lib/hash";
 import { signAccessToken } from "../../lib/jwt";
 
-import { rotateSession } from "./session.service";
+import { touchSession } from "./session.service";
 
 export async function refreshUserSession(
     refreshToken: string
@@ -36,10 +37,10 @@ export async function refreshUserSession(
         throw new Error("Account disabled.");
     }
 
-    const {
-        session,
-        refreshToken: newRefreshToken,
-    } = await rotateSession(existingSession.id);
+    await touchSession(
+        existingSession.id,
+        refreshTokenHash
+    );
 
     const accessToken = signAccessToken({
         userId: existingSession.user.id,
@@ -48,11 +49,7 @@ export async function refreshUserSession(
 
     return {
         accessToken,
-
-        refreshToken: newRefreshToken,
-
-        sessionId: session.id,
-
+        sessionId: existingSession.id,
         user: {
             id: existingSession.user.id,
             email: existingSession.user.email,

@@ -25,28 +25,36 @@ export async function createSession(
     };
 }
 
-export async function rotateSession(
-    sessionId: string
+export async function touchSession(
+    sessionId: string,
+    expectedRefreshTokenHash: string
 ) {
-    const {
-        refreshToken,
-        refreshTokenHash,
-        expiresAt,
-    } = generateSessionTokens();
+    const now = new Date();
+    const expiresAt = new Date(
+        now.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
 
-    const session = await prisma.session.update({
+    const result = await prisma.session.updateMany({
         where: {
             id: sessionId,
+            refreshTokenHash: expectedRefreshTokenHash,
+            expiresAt: {
+                gt: now,
+            },
         },
         data: {
-            refreshTokenHash,
             expiresAt,
-            lastSeenAt: new Date(),
+            lastSeenAt: now,
         },
     });
 
-    return {
-        session,
-        refreshToken,
-    };
+    if (result.count !== 1) {
+        throw new Error("Invalid refresh token.");
+    }
+
+    return prisma.session.findUniqueOrThrow({
+        where: {
+            id: sessionId,
+        },
+    });
 }

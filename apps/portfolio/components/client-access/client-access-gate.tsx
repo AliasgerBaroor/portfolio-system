@@ -19,9 +19,14 @@ export default function ClientAccessGate({
         return null;
     }
 
-    if (!authenticated) {
-        return <ClientLogin />;
-    }
+    /*
+     * IMPORTANT:
+     *
+     * Do NOT show ClientLogin automatically here.
+     *
+     * The public portfolio must be visible
+     * even when the client is not authenticated.
+     */
 
     return <>{children}</>;
 }

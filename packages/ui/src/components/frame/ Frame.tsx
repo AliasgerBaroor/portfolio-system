@@ -7,7 +7,7 @@ import type {
 import { cn } from "@workspace/ui/lib/utils";
 
 export type FrameStrength = "low" | "medium" | "high";
-export type FrameRadius = "none" | "sm" | "md" | "lg" | "pill";
+export type FrameRadius = "none" | "xs" | "sm" | "md" | "lg" | "pill";
 
 export type FrameRadiusRemove =
     | "all"
@@ -32,6 +32,7 @@ type FrameProps = {
     children: ReactNode;
     strength?: FrameStrength;
     shift?: number;
+    visual?: boolean;
     radius?: FrameRadius;
     radiusRemove?: FrameRadiusRemove;
     className?: string;
@@ -43,6 +44,7 @@ type FrameProps = {
 
 const radiusValues = {
     none: "0",
+    xs: "var(--radius-xs)",
     sm: "var(--radius-sm)",
     md: "var(--radius-md)",
     lg: "var(--radius-lg)",
@@ -54,6 +56,7 @@ export function Frame({
     children,
     strength = "medium",
     shift = 0,
+    visual = true,
     radius = "pill",
     radiusRemove,
     className = "",
@@ -61,7 +64,7 @@ export function Frame({
     ...props
 }: FrameProps) {
     const Component = as ?? "div";
-
+    
     const baseRadius = radiusValues[radius];
 
     const remove = {
@@ -117,7 +120,7 @@ export function Frame({
         <Component
             {...props}
             className={cn(
-                "bg-white overflow-hidden",
+                visual && "bg-white overflow-hidden",
                 className
             )}
             style={{

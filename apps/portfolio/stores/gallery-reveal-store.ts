@@ -1,9 +1,17 @@
+
 import { create } from "zustand";
 
 type GalleryRevealStore = {
     revealed: Set<string>;
     reveal: (id: string) => void;
+    reset: () => void;
 };
+
+function getUniqueImageId(id: string): string {
+    return id
+        .replace(/__horizontal_-?\d+$/, "")
+        .replace(/__repeat_\d+$/, "");
+}
 
 export const useGalleryRevealStore =
     create<GalleryRevealStore>((set) => ({
@@ -11,13 +19,17 @@ export const useGalleryRevealStore =
 
         reveal: (id) =>
             set((state) => {
-                if (state.revealed.has(id)) {
+                const uniqueId = getUniqueImageId(id);
+
+                if (state.revealed.has(uniqueId)) {
                     return state;
                 }
 
                 const revealed = new Set(state.revealed);
-                revealed.add(id);
+                revealed.add(uniqueId);
 
                 return { revealed };
             }),
+
+        reset: () => set({ revealed: new Set() }),
     }));

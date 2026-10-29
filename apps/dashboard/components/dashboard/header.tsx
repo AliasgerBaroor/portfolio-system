@@ -1,18 +1,19 @@
 "use client";
 import { Button } from "@workspace/ui/components/button";
-import { Typography } from "@workspace/ui/components/typography";
-import { LogOut, Rocket } from "lucide-react";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { Separator } from "@workspace/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { usePortfolio } from "@/contexts/portfolio-context";
+import { Frame } from "@workspace/ui/components/frame";
+import { LogoutIcon, ChevronIcon } from "@/icons";
 
 export default function Header() {
   const router = useRouter();
   const { logout } = useAuth();
-    const {
-      portfolio,
-    } = usePortfolio();
+  const {
+    portfolio,
+  } = usePortfolio();
 
   async function handleLogout() {
     try {
@@ -23,50 +24,27 @@ export default function Header() {
       console.error(error);
     }
   }
-  
+
   return (
-    <header className="flex items-start justify-between">
-      <div className="space-y-1 flex flex-col gap-2">
-        <Typography
-          variant="overline"
-          className="tracking-[0.25em] text-secondary-foreground"
-        >
-          PORTFOLIO CONTROL
-        </Typography>
-
-        <Typography variant="heading-xl">
-          {portfolio?.title}
-        </Typography>
-      </div>
-
-      <div className="flex items-center gap-4">
-        {/* Draft Badge */}
-        <div className="rounded-full bg-muted px-3 py-1">
-          <Typography variant="caption">
-            Draft
+    <header>
+      <Frame className="px-6 py-3" radius="sm">
+        <div className="flex items-start justify-between">
+          <Typography variant="heading-md">
+            {portfolio?.title}
           </Typography>
-        </div>
-
-        <Separator orientation="vertical" className="h-6" />
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button size="sm">
-            <Rocket width={8} height={8} />
-
-            Publish
-          </Button>
 
           <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xs"
+            variant="outline"
+            size="icon-sm"
+            radius="sm"
+            className="rounded-sm"
             onClick={handleLogout}
+            aria-label="Log out"
           >
-            <LogOut className="h-4 w-4" />
+            <LogoutIcon />
           </Button>
         </div>
-      </div>
+      </Frame>
     </header>
   );
 }

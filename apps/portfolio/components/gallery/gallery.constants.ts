@@ -1,0 +1,1 @@
+export const BOTTOM_THRESHOLD = 1200;

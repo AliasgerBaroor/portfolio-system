@@ -1,392 +1,359 @@
-"use client";
+    "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+    import { useEffect, useState } from "react";
+    import Image from "next/image";
 
-import {
-    Dialog,
-    DialogOverlay,
-    DialogPortal,
-} from "@workspace/ui/components/dialog";
+    import {
+        Dialog,
+        DialogOverlay,
+        DialogPortal,
+    } from "@workspace/ui/components/dialog";
+import { GalleryMoreInfoDialog } from "./gallery-more-info-dialog";
 
-import { Button } from "@workspace/ui/components/button";
-import { Frame } from "@workspace/ui/components/frame";
-import { Typography } from "@workspace/ui/components/typography";
-import { PlaceHolderLogoIcon } from "@workspace/ui/icons/placeholder";
-import { CrossIcon, } from "@workspace/ui/icons/cross";
-import { MinimizeIcon, } from "@workspace/ui/icons/minimize";
+    import { Button } from "@workspace/ui/components/button";
+    import { Frame } from "@workspace/ui/components/frame";
+    import { Typography } from "@workspace/ui/components/typography/typography";
+    import { PlaceHolderLogoIcon } from "@workspace/ui/icons/placeholder";
+    import { CrossIcon, } from "@workspace/ui/icons/cross";
 
-import type { GalleryItem } from "./gallery.types";
-import DialogPopup from "./dialog-primitive-popup";
-import { ProjectTagList } from "@workspace/ui/components/project-tag";
-import { projectTags } from "@/data/project-tag";
-import { ProjectMetrics } from "../metric";
-import { metrics } from "@/data/project-metrics";
+    import type { GalleryItem } from "./gallery.types";
+    import DialogPopup from "../dialog-primitive-popup";
+    import { FloatingClock } from "../floating-clock/floating-clock";
+    import { getStoragePublicUrl } from "@/lib/supabase/storage";
 
-interface Props {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    item: GalleryItem | null;
-}
+    interface Props {
+        open: boolean;
+        onOpenChange: (open: boolean) => void;
+        item: GalleryItem | null;
+        onMoreInfoClick: () => void;
+        showInfoCard: boolean;
+    }
 
-export function GalleryPreviewDialog({
-    open,
-    onOpenChange,
-    item,
-}: Props) {
-    const [showDetails, setShowDetails] = useState(false);
+    export function GalleryPreviewDialog({
+        open,
+        onOpenChange,
+        item,
+        onMoreInfoClick,
+        showInfoCard
+    }: Props) {
+        const [imageLoaded, setImageLoaded] = useState(false);
+        const [imageError, setImageError] = useState(false);
+        const [logoLoaded, setLogoLoaded] = useState(false);
+        const [logoError, setLogoError] = useState(false);
 
-    if (!item) return null;
+        const handlePreviewOpenChange = (nextOpen: boolean) => {
+            onOpenChange(nextOpen);
+        };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogPortal>
+        useEffect(() => {
+            setImageLoaded(false);
+            setImageError(false);
+        }, [item?.media.src]);
 
-                {/* ================================= */}
-                {/* Background */}
-                {/* ================================= */}
+        useEffect(() => {
+            setLogoLoaded(false);
+            setLogoError(false);
+        }, [item?.project?.logo]);
 
-                <DialogOverlay className="gallery-dialog-overlay" />
+        if (!item) return null;
 
-                {/* ================================= */}
-                {/* Main Preview */}
-                {/* ================================= */}
+        const width = item.media.width;
+        const height = item.media.height;
 
-                <DialogPopup>
-                    <Frame
-                        strength="high"
-                        radius="md"
+        return (
+            <Dialog
+                open={open}
+                onOpenChange={handlePreviewOpenChange}
+            >
+                <DialogPortal>
+
+                    {/* ================================= */}
+                    {/* Background */}
+                    {/* ================================= */}
+
+                    <DialogOverlay
+                        className="gallery-dialog-overlay"
+                        onClick={() => handlePreviewOpenChange(false)}
+                    />
+
+                    {/* ================================= */}
+                    {/* Main Preview */}
+                    {/* ================================= */}
+
+                    <DialogPopup
+                        className="
+                        gallery-preview-popup
+        fixed
+        inset-0
+        z-[1000]
+        flex
+        flex-col
+        items-center
+        pointer-events-none
+    "
                     >
-                        <div className="flex flex-col items-center">
+                        <div
+                            className="
+            relative
+            flex
+            h-[100dvh]
+            w-full
+            flex-col
+            items-center
+            justify-center
+            pt-[60px]
+            pb-[120px]
+            pointer-events-none
+        "
+                        >
+                            {/* ================================= */}
+                            {/* MAIN PREVIEW */}
+                            {/* ================================= */}
 
-                            {/* Preview Card */}
 
-                            <div
+                            <Frame
+                                radius="md"
                                 className="
-                                    h-[545px]
-                                    w-[815px]
-                                    bg-white
-                                    p-[10px]
-                                    shadow-2xl
-                                "
+        pointer-events-auto
+        relative
+        flex
+        box-border
+        w-fit
+        max-w-[calc(100vw-32px)]
+        shrink-0
+    "
                             >
                                 <div
                                     className="
-                                        grid
-                                        h-full
-                                        grid-cols-[392px_392px]
-                                        grid-rows-[258px_258px]
-                                        gap-[10px]
-                                    "
+            relative
+            box-border
+            w-full
+            max-w-full
+            rounded-[12px]
+            bg-white
+            p-[6px]
+            md:rounded-[18px]
+            md:p-[10px]
+        "
+                                    style={{
+                                        width: `min(${width * 1.3}px, calc(100vw - 48px))`,
+                                    }}
                                 >
-
-                                    {/* ============================= */}
-                                    {/* Left */}
-                                    {/* ============================= */}
-
                                     <div
                                         className="
-                                            row-span-2
-                                            overflow-hidden
-                                            rounded-[18px]
-                                        "
+                relative
+                w-full
+                max-w-full
+                overflow-hidden
+                rounded-[8px]
+                bg-white
+                md:rounded-[12px]
+            "
+                                        style={{
+                                            aspectRatio: `${width} / ${height}`,
+                                            maxHeight: "min(72dvh, 700px)",
+                                        }}
                                     >
-                                        <Image
-                                            src="/images/details/placeholder.png"
-                                            width={393}
-                                            height={526}
-                                            alt=""
-                                            className="
-                                                block
-                                                h-auto
-                                                w-full
-                                                rounded-[18px]
-                                            "
-                                            unoptimized
-                                        />
+                                        {!imageLoaded && !imageError && (
+                                            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white">
+                                                <div
+                                                    role="status"
+                                                    aria-label="Loading image"
+                                                    className="h-8 w-8 animate-spin rounded-full border-4 border-[#221E15]/15 border-t-[#221E15]"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {imageError ? (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white">
+                                                <PlaceHolderLogoIcon />
+                                                <Typography variant="body-md">
+                                                    Unable to load preview
+                                                </Typography>
+                                            </div>
+                                        ) : (
+                                            <Image
+                                                key={item.media.src}
+                                                src={item.media.src}
+                                                alt={item.media.alt ?? "Project preview"}
+                                                fill
+                                                sizes="(max-width: 767px) calc(100vw - 32px), 100vw"
+                                                className={`object-contain transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"
+                                                    }`}
+                                                unoptimized
+                                                onLoad={() => setImageLoaded(true)}
+                                                onError={() => setImageError(true)}
+                                            />
+                                        )}
                                     </div>
-
-                                    {/* ============================= */}
-                                    {/* Right Top */}
-                                    {/* ============================= */}
-
-                                    <div
-                                        className="
-                                            overflow-hidden
-                                            rounded-[18px]
-                                        "
-                                    >
-                                        <Image
-                                            src="/images/details/logo.png"
-                                            width={393}
-                                            height={258}
-                                            alt=""
-                                            className="
-                                                block
-                                                h-auto
-                                                w-full
-                                                rounded-[18px]
-                                            "
-                                            unoptimized
-                                        />
-                                    </div>
-
-                                    {/* ============================= */}
-                                    {/* Right Bottom */}
-                                    {/* ============================= */}
-
-                                    <div
-                                        className="
-                                            overflow-hidden
-                                            rounded-[18px]
-                                        "
-                                    >
-                                        <Image
-                                            src="/images/details/showcase.png"
-                                            width={393}
-                                            height={258}
-                                            alt=""
-                                            className="
-                                                block
-                                                h-auto
-                                                w-full
-                                                rounded-[18px]
-                                            "
-                                            unoptimized
-                                        />
-                                    </div>
-
                                 </div>
-                            </div>
-                        </div>
-                    </Frame>
-                </DialogPopup>
+                            </Frame>
 
-                {/* ================================= */}
-                {/* Bottom Controls */}
-                {/* ================================= */}
 
-                {!showDetails && (
-                    <div
-                        className="
-                            fixed
-                            bottom-8
-                            left-1/2
-                            z-[60]
-                            flex
-                            -translate-x-1/2
-                            items-center
-                            gap-6
-                        "
-                    >
+                            {/* ================================= */}
+                            {/* INFO CARD + CLOSE */}
+                            {/* ================================= */}
 
-                        {/* ============================= */}
-                        {/* Info Card */}
-                        {/* ============================= */}
-
-                        <Frame
-                            radius="md"
-                            className="w-[510px]"
-                        >
-                            <div
-                                className="
-                                    flex
-                                    items-center
-                                    gap-3
-                                    bg-white
-                                    px-3
-                                    py-2
-                                "
-                            >
-
-                                {/* Logo */}
-
-                                <PlaceHolderLogoIcon
-                                    className="
-                                        shrink-0
-                                        rounded-[8px]
-                                        bg-[#FFF7EB]
-                                        p-2
-                                    "
-                                />
-
-                                {/* Content */}
-
-                                <div className="min-w-0 flex-1">
-
-                                    <Typography
-                                        variant="body-lg"
-                                        className="text-secondary-foreground"
+ 
+                                    {/* INFO CARD */}
+                            {showInfoCard && item && (
+                                    <div
+                                        className="
+    pointer-events-auto
+    absolute
+    bottom-[92px]
+    md:bottom-[60px]
+    left-1/2
+    flex
+    w-[calc(100vw-32px)]
+    max-w-[510px]
+    -translate-x-1/2
+    flex-col
+    items-center
+    gap-3
+    md:w-auto
+    md:max-w-none
+    md:flex-row
+    md:gap-6
+"
                                     >
-                                        A trust-first travel website and
-                                        mobile app designed for a
-                                        couples-first brand.
-                                    </Typography>
+                                        <Frame
+                                            radius="md"
+                                            className="
+                        w-full
+                        md:w-[510px]
+                    "
+                                        >
+                                            <div
+                                                className="
+                            flex
+                            gap-3
+                            bg-white
+                            px-3
+                            py-2
+                        "
+                                            >
+                                                {!logoLoaded && !logoError && (
+                                                    <div
+                                                        role="status"
+                                                        aria-label="Loading logo"
+                                                        className="absolute inset-0 flex items-center justify-center"
+                                                    >
+                                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#221E15]/15 border-t-[#221E15]" />
+                                                    </div>
+                                                )}
 
+                                                {logoError ? (
+                                                    <div className="relative flex h-[48px] w-[48px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#FFF7EB] p-2">
+                                                        <img
+                                                            src={getStoragePublicUrl(
+                                                                "placeholder/default-brand.svg"
+                                                            )}
+                                                            alt="Project logo"
+                                                            className={`h-full w-full object-contain transition-opacity duration-200 ${logoLoaded ? "opacity-100" : "opacity-0"
+                                                                }`}
+                                                            onLoad={() => setLogoLoaded(true)}
+                                                            onError={() => setLogoError(true)}
+                                                        />
+                                                    </div>
+                                                ) : item.project?.logo ? (
+                                                    <img
+                                                        src={getStoragePublicUrl(item.project.logo)}
+                                                        alt={`${item.project.name} logo`}
+                                                        onLoad={() => setLogoLoaded(true)}
+                                                        onError={() => setLogoError(true)}
+                                                        className="h-[48px] w-[48px] shrink-0"
+                                                    />
+                                                ) : (
+                                                    <img
+                                                        src={getStoragePublicUrl(
+                                                            "placeholder/default-brand.svg"
+                                                        )}
+                                                        alt="Project logo"
+                                                        className="h-[48px] w-[48px] shrink-0 rounded-[8px] bg-[#FFF7EB] object-contain p-2"
+                                                    />
+                                                )}
+                                                
+                                                <div className="min-w-0 flex-1">
+                                                    <Typography
+                                                        variant="body-lg"
+                                                        className="text-secondary-foreground line-clamp-2"
+                                                    >
+                                                        {item.project?.description ?? ""}
+                                                    </Typography>
+
+                                                    <Button
+                                                        type="button"
+                                                        variant="link"
+                                                        size="compact"
+                                                onClick={onMoreInfoClick}
+                                                        className="
+            h-auto
+            p-0
+            font-heading
+            text-[12px]
+            font-semibold
+            leading-4
+            tracking-normal
+            text-[#221E15]
+            underline
+            decoration-solid
+            underline-offset-auto
+        "
+                                                    >
+                                                        More Info
+                                                    </Button>
+
+                                                </div>
+                                            </div>
+                                        </Frame>
+
+                                        {/* DESKTOP CLOSE ONLY */}
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            radius="md"
+                                            onClick={() => handlePreviewOpenChange(false)}
+                                            className="hidden md:flex shrink-0 rounded-md bg-white hover:bg-white"
+                                            frameClassName="hidden md:flex">
+                                            <CrossIcon className="size-7" />
+                                        </Button>
+                                    </div>
+                            )}
+                                    {/* MOBILE BOTTOM CONTROLS */}
+                                    {/* MOBILE CLOSE - BOTTOM LEFT */}
                                     <Button
                                         type="button"
-                                        variant="link"
-                                        onClick={() =>
-                                            setShowDetails(true)
-                                        }
+                                        size="icon"
+                                        radius="md"
+                                        onClick={() => handlePreviewOpenChange(false)}
+                                        frameClassName="
+            fixed
+            left-4
+            bottom-7
+            z-[200]
+            md:hidden
+        "
                                         className="
-                                            p-0
-                                            font-semibold
-                                            text-foreground
-                                            underline
-                                            underline-offset-4
-                                        "
+            shrink-0
+            border-4
+            border-white/40
+            bg-white
+            hover:bg-white
+            rounded-md
+        "
                                     >
-                                        More Info
+                                        <CrossIcon className="size-7" />
                                     </Button>
 
-                                </div>
-                            </div>
-                        </Frame>
+                        </div>
+                    </DialogPopup>
+                    {/* ================================= */}
+                    {/* Details Window */}
+                    {/* ================================= */}
 
-                        {/* ============================= */}
-                        {/* Close */}
-                        {/* ============================= */}
-
-                        <Button
-                            type="button"
-                            size="icon"
-                            radius="md"
-                            onClick={() =>
-                                onOpenChange(false)
-                            }
-                            className="
-                                shrink-0
-                                border-4
-                                border-white/40
-                                bg-white
-                                hover:bg-white
-                            "
-                        >
-                            <CrossIcon className="size-7" />
-                        </Button>
-
-                    </div>
-                )}
-
-                {/* ================================= */}
-                {/* Details Window */}
-                {/* ================================= */}
-
-                {showDetails && (
-                    <div
-                        className="
-            fixed
-            left-1/2
-            top-[calc(55%)]
-            z-[100]
-            flex
-            -translate-x-1/2
-            flex-col
-            items-center
-            gap-6
-        "
-                    >
-                        {/* ================================= */}
-                        {/* Details Card */}
-                        {/* ================================= */}
-
-                        <Frame
-                            strength="high"
-                            radius="md"
-                            className="
-                                    w-[380px]
-                                    bg-white
-                                "
-                        >
-                            <div className="p-6 flex flex-col gap-4">
-
-                                {/* Header */}
-                                <div className="flex items-center gap-3">
-                                <PlaceHolderLogoIcon
-                                    className="
-                                        shrink-0
-                                        rounded-[8px]
-                                        bg-[#FFF7EB]
-                                        p-2
-                                    "
-                                />
-
-                                <div className="flex flex-col">
-
-                                <Typography
-                                    variant="heading-xs"
-                                    className="leading-none"
-                                >
-                                    30 Sundays
-                                </Typography>
-
-                                <Typography
-                                    variant="body-md"
-                                        className="mt-1 text-secondary-foreground"
-                                >
-                                    Travel
-                                </Typography>
-
-                                </div>
-
-                                </div>
-                                {/* Tags */}
-
-                                <ProjectTagList tags={projectTags} />
-
-                                {/* Divider */}
-
-                                <div className="my-4 h-px bg-divider" />
-
-                                {/* ================================= */}
-                                {/* Metrics */}
-                                {/* ================================= */}
-
-                                <ProjectMetrics metrics={metrics} />
-
-                                {/* Divider */}
-
-                                <div className="my-4 h-px bg-divider" />
-
-                                {/* Description */}
-
-                                <Typography
-                                    variant="body-sm"
-                                    className="text-foreground"
-                                >
-                                    Lorem ipsum dolor sit amet consectetur. Quam velit
-                                    blandit turpis id nulla quis justo. Sit eu nisi et
-                                    viverra ac diam urna.
-                                </Typography>
-
-                            </div>
-                        </Frame>
-
-                        {/* ================================= */}
-                        {/* Minimize Button */}
-                        {/* ================================= */}
-
-                        <Button
-                            type="button"
-                            size="icon"
-                            radius="md"
-                            onClick={() => setShowDetails(false)}
-                            className="
-                                shrink-0
-                                border-4
-                                border-white/40
-                                bg-white
-                                hover:bg-white
-                            "
-                        >
-                            <MinimizeIcon className="size-7" />
-                        </Button>
-                    </div>
-                )}
-
-
-            </DialogPortal>
-        </Dialog>
-    );
-}
+                </DialogPortal>
+                {/* <FloatingClock /> */}
+            </Dialog>
+        );
+    }

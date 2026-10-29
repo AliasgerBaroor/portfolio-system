@@ -53,12 +53,30 @@ export async function createPortfolio(
         );
     }
 
-    return prisma.portfolio.create({
-        data: {
-            ownerId,
-            title,
-            slug,
-        },
+    return prisma.$transaction(async (tx) => {
+        const portfolio =
+            await tx.portfolio.create({
+                data: {
+                    ownerId,
+                    title,
+                    slug,
+                },
+            });
+
+        await tx.cmsCollection.create({
+            data: {
+                portfolioId: portfolio.id,
+                name: "Basic info",
+                slug: "basic-info",
+                description:
+                    "Basic portfolio information",
+                isSystem: true,
+                isEnabled: true,
+                sortOrder: 0,
+            },
+        });
+
+        return portfolio;
     });
 }
 
@@ -86,6 +104,30 @@ export async function updatePortfolio(
         },
         data: {
             ...data,
+        },
+    });
+}
+
+export async function deletePortfolio(
+    userId: string
+) {
+    const portfolio =
+        await prisma.portfolio.findFirst({
+            where: {
+                ownerId: userId,
+                deletedAt: null,
+            },
+        });
+
+    if (!portfolio) {
+        throw new Error(
+            "Portfolio not found."
+        );
+    }
+
+    return prisma.portfolio.delete({
+        where: {
+            id: portfolio.id,
         },
     });
 }

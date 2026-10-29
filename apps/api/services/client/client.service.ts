@@ -32,3 +32,33 @@ export async function createClient(
         },
     });
 }
+
+export async function removeClient(
+    userId: string,
+    clientId: string
+) {
+    const client =
+        await prisma.client.findFirst({
+            where: {
+                id: clientId,
+                ownerId: userId,
+                deletedAt: null,
+            },
+        });
+
+    if (!client) {
+        throw new Error(
+            "Client not found."
+        );
+    }
+
+    return prisma.client.update({
+        where: {
+            id: client.id,
+        },
+        data: {
+            isActive: false,
+            deletedAt: new Date(),
+        },
+    });
+}

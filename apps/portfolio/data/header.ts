@@ -26,9 +26,8 @@ export const headerButtons: HeaderItemType[] = [
     },
     {
         key: "contact",
-        url: "/contact",
         icon: "envelope",
         color: "pink",
-        action: "navigate",
+        action: "open-contact",
     },
 ];

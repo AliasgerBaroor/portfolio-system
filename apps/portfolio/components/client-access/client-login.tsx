@@ -7,22 +7,25 @@ import { Card } from "@workspace/ui/components/card";
 import { Field } from "@workspace/ui/components/field";
 import { Frame } from "@workspace/ui/components/frame";
 import { Input } from "@workspace/ui/components/input";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { LockIcon } from "@workspace/ui/icons/lock";
 
 import { useClientAccess } from "@/contexts/client-access-context";
 
-export default function ClientLogin() {
+interface ClientLoginProps {
+  credentialId: string;
+  onSuccess: () => void;
+}
+
+export default function ClientLogin({
+  credentialId,
+  onSuccess,
+}: ClientLoginProps) {
   const { login } = useClientAccess();
 
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -33,11 +36,17 @@ export default function ClientLogin() {
       return;
     }
 
+    if (!credentialId) {
+      setError("Access credential is missing.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      await login(password);
+      await login(password, credentialId);
+      onSuccess();
     } catch (error) {
       setError(
         error instanceof Error
@@ -63,7 +72,6 @@ export default function ClientLogin() {
         <div className="w-full max-w-xl">
           <Card className="w-full p-10">
             <div className="flex flex-col gap-6">
-
               <div className="flex justify-center">
                 <Frame
                   strength="high"
@@ -91,9 +99,7 @@ export default function ClientLogin() {
                     value={password}
                     disabled={loading}
                     onChange={(event) =>
-                      setPassword(
-                        event.target.value
-                      )
+                      setPassword(event.target.value)
                     }
                     endContent={
                       <Button
@@ -122,7 +128,6 @@ export default function ClientLogin() {
                   </Typography>
                 )}
               </form>
-
             </div>
           </Card>
         </div>

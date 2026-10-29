@@ -4,7 +4,7 @@ import { authMiddleware } from "../../middleware/auth";
 
 import {
     CreatePortfolioSchema,
-} from "../../validators/portfolio";
+} from "../../validators/portfolio/portfolio";
 
 import {
     createPortfolio,

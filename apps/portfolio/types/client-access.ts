@@ -9,10 +9,16 @@ export type ClientAccessLoginResponse = {
     expiresAt: string;
 };
 
-export type ClientPortfolioResponse = {
+export interface ClientPortfolioResponse {
     success: boolean;
+
     portfolio: ClientPortfolio;
-};
+
+    session: {
+        expiresAt: string;
+        credentialId: string;
+    };
+}
 
 export type ClientPortfolio = {
     id: string;
@@ -25,6 +31,7 @@ export type ClientPortfolio = {
     createdAt: string;
     deletedAt: string | null;
     updatedAt: string;
+    defaultAccessKeyId?: string;
 
     theme: string | null;
     customDomain: string | null;

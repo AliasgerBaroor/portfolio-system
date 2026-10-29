@@ -27,6 +27,17 @@ class ClientService {
 
         return response.data;
     }
+
+    async removeClient(
+        clientId: string
+    ) {
+        const response =
+            await api.delete(
+                `/clients/${clientId}`
+            );
+
+        return response.data;
+    }
 }
 
 export const clientService =

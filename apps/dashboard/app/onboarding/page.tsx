@@ -23,6 +23,7 @@ import {
 } from "@workspace/ui/components/field";
 
 import { Input } from "@workspace/ui/components/input";
+import { generateSlug } from "@workspace/ui/lib/generate-slug";
 
 export default function OnboardingPage() {
     const router = useRouter();
@@ -41,14 +42,6 @@ export default function OnboardingPage() {
 
     const [error, setError] =
         useState("");
-
-    function generateSlug(value: string) {
-        return value
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, "");
-    }
 
     function handleTitleChange(
         value: string
@@ -117,7 +110,6 @@ export default function OnboardingPage() {
                                     <FieldLabel className="font-medium text-secondary-foreground">
                                         Portfolio Name
                                     </FieldLabel>
-
                                     <Input
                                         value={title}
                                         onChange={(e) =>
@@ -125,6 +117,8 @@ export default function OnboardingPage() {
                                                 e.target.value
                                             )
                                         }
+                                        inputSize="md"
+                                        radius="sm"
                                         placeholder="Aliasger Portfolio"
                                         disabled={loading}
                                     />
@@ -132,7 +126,7 @@ export default function OnboardingPage() {
 
                                 <Field>
                                     <FieldLabel className="font-medium text-secondary-foreground">
-                                        Portfolio URL
+                                        Portfolio Slug
                                     </FieldLabel>
 
                                     <Input
@@ -142,6 +136,8 @@ export default function OnboardingPage() {
                                                 e.target.value
                                             )
                                         }
+                                        inputSize="md"
+                                        radius="sm"
                                         placeholder="aliasger-portfolio"
                                         disabled={loading}
                                     />
@@ -155,6 +151,7 @@ export default function OnboardingPage() {
 
                                 <Field>
                                     <Button
+                                    size="sm"
                                         className="w-full h-10"
                                         type="submit"
                                         disabled={

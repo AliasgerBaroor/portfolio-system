@@ -1,28 +1,25 @@
-"use client"; 
+"use client";
+
 import { icons } from "@workspace/ui/icons/registry";
 import type { NavigationItemProps } from "./floating-navigation.types";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { Button } from "@workspace/ui/components/button";
 
 export default function NavigationItem({
     item,
     active,
     onClick,
+    mobileLabel = false,
+    disabled = false,
 }: NavigationItemProps) {
     const Icon = item.icon ? icons[item.icon] : null;
-
-    const color = active ? {
-        text: "text-foreground",
-        bg: "bg-primary"
-    } : {
-        text: "text-accent-foreground",
-        bg: "bg-white"
-    };
 
     return (
         <Button
             variant={active ? "active" : "navigation"}
             onClick={onClick}
+            className="floating-navigation-item"
+            disabled={disabled}
         >
             {Icon && (
                 <Icon
@@ -32,7 +29,14 @@ export default function NavigationItem({
             )}
 
             {item.label && (
-                <Typography variant="body-xl">
+                <Typography
+                    variant="body-xl"
+                    className={
+                        mobileLabel
+                            ? "floating-navigation-mobile-label"
+                            : undefined
+                    }
+                >
                     {item.label}
                 </Typography>
             )}

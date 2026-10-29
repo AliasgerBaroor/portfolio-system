@@ -11,9 +11,7 @@ import type {
     InternalAxiosRequestConfig,
 } from "axios";
 
-import refreshClient from "./refresh";
-
-let refreshPromise: Promise<void> | null = null;
+import { refreshAccessToken } from "./refresh-session";
 
 type RetryRequestConfig =
     InternalAxiosRequestConfig & {
@@ -35,6 +33,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+
 api.interceptors.response.use(
     (response) => response,
 
@@ -43,40 +42,36 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        if (!refreshPromise) {
-            refreshPromise = (async () => {
-                const response =
-                    await refreshClient.post("/auth/refresh");
+        const originalRequest =
+            error.config as RetryRequestConfig | undefined;
 
-                setAccessToken(
-                    response.data.accessToken
-                );
-            })().finally(() => {
-                refreshPromise = null;
-            });
-        }
-
-        try {
-            await refreshPromise;
-        } catch {
-            clearAccessToken();
-
+        if (!originalRequest) {
             return Promise.reject(error);
         }
 
-        const originalRequest =
-            error.config as RetryRequestConfig;
+        // Never refresh in response to a refresh request.
+        if (originalRequest.url?.includes("/auth/refresh")) {
+            return Promise.reject(error);
+        }
 
+        // Avoid retrying the same request repeatedly.
         if (originalRequest._retry) {
             return Promise.reject(error);
         }
 
         originalRequest._retry = true;
 
-        originalRequest.headers.Authorization =
-            `Bearer ${getAccessToken()}`;
+        try {
+            const accessToken = await refreshAccessToken();
 
-        return api(originalRequest);
+            originalRequest.headers.Authorization =
+                `Bearer ${accessToken}`;
+
+            return api(originalRequest);
+        } catch {
+            clearAccessToken();
+            return Promise.reject(error);
+        }
     }
 );
 

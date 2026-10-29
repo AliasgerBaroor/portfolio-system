@@ -6,12 +6,15 @@ import { Frame } from "@workspace/ui/components/frame";
 import { useAboutDialogStore } from "@/stores/about-dialog-store";
 import { headerButtons, HeaderItemType } from "@/data/header";
 import { HeaderAction } from "./header-types";
+import { useContactOpenDialogStore } from "@/stores/contact-dialog-store";
 
 export default function Header() {
   const open = useAboutDialogStore((state) => state.open);
+  const openContact = useContactOpenDialogStore((state) => state.open);
 
   const actions: Record<HeaderAction, () => void> = {
     "open-about": open,
+    "open-contact": openContact,
     navigate: () => { },
     none: () => { },
   };

@@ -1,6 +1,6 @@
 "use client";
 import { Frame } from "@workspace/ui/components/frame";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { LockIcon } from "@workspace/ui/icons/lock";
 
 import { useState } from "react";
@@ -50,9 +50,11 @@ export function LoginForm({
 
             router.push("/");
         } catch (error) {
-            if (error instanceof Error) {
-                setError(error.message);
-            }
+            console.error("Login error:", error);
+
+            setError(
+                "We're unable to log in right now. Please try again later."
+            );
         }
     }
 

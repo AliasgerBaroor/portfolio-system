@@ -1,5 +1,6 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "@workspace/ui/lib/utils";
 import { Frame, type FrameRadius } from "./frame";
 
@@ -15,7 +16,10 @@ type ButtonVariant =
 
 type FrameStrength = "low" | "medium" | "high";
 
-const frameVariants: Record<ButtonVariant, FrameStrength | null> = {
+const frameVariants: Record<
+  ButtonVariant,
+  FrameStrength | null
+> = {
   default: "medium",
   active: "medium",
   secondary: "low",
@@ -34,43 +38,60 @@ const buttonVariants = cva(
     "whitespace-nowrap",
     "select-none",
     "cursor-pointer",
+    "font-heading",
     "font-medium",
     "outline-none",
     "transition-all",
-
-    // Figma
-    "rounded-pill",
-    "bg-primary",
-    "text-primary-foreground",
-    "shadow-[0_4px_0_0_var(--ink)]",
 
     // Icon
     "[&_svg]:shrink-0",
 
     // Interaction
     "active:translate-y-[2px]",
-    "focus-visible:ring-3 focus-visible:ring-ring/50",
+    "focus-visible:ring-3",
+    "focus-visible:ring-ring/50",
     "disabled:pointer-events-none",
     "disabled:opacity-50",
   ].join(" "),
   {
     variants: {
       variant: {
-        default: "",
-
-        outline: [
-          "bg-white",
-          "text-foreground",
+        // Primary / default Figma button
+        default: [
+          "rounded-[100px]",
+          "border-2",
+          "border-[#221E15]",
+          "bg-[#FFB801]",
+          "text-[#221E15]",
+          "shadow-[0_4px_0_0_#221E15]",
         ].join(" "),
 
+        // White low-strength button
         secondary: [
+          "rounded-[100px]",
+          "border",
+          "border-[#221E15]",
           "bg-white",
-          "text-ink",
+          "text-[#221E15]",
+          "shadow-[0_2px_0_0_#221E15]",
+
           "disabled:bg-muted",
           "disabled:text-muted-foreground",
         ].join(" "),
 
+        // White outlined button
+        outline: [
+          "rounded-[100px]",
+          "border",
+          "border-[#221E15]",
+          "bg-white",
+          "text-[#221E15]",
+          "shadow-[0_2px_0_0_#221E15]",
+          "data-[square=true]:!rounded-sm",
+        ].join(" "),
+
         ghost: [
+          "rounded-[100px]",
           "border-transparent",
           "bg-transparent",
           "shadow-none",
@@ -79,11 +100,16 @@ const buttonVariants = cva(
         ].join(" "),
 
         destructive: [
+          "rounded-[100px]",
+          "border-2",
+          "border-[#221E15]",
           "bg-destructive",
           "text-white",
+          "shadow-[0_4px_0_0_#221E15]",
         ].join(" "),
 
         link: [
+          "rounded-none",
           "border-transparent",
           "bg-transparent",
           "shadow-none",
@@ -94,6 +120,8 @@ const buttonVariants = cva(
 
         active: [
           "rounded-pill",
+          "border-2",
+          "border-[#221E15]",
           "bg-primary",
           "text-primary-foreground",
           "shadow-[0_4px_0_0_var(--ink)]",
@@ -127,6 +155,22 @@ const buttonVariants = cva(
           "[&_svg]:size-4",
         ].join(" "),
 
+        // Exact Figma button:
+        //
+        // padding: 6px 12px
+        // gap: 8px
+        // Delight 12px / 500 / 16px / 0.24px
+        compact: [
+          "h-auto",
+          "gap-2",
+          "px-3",
+          "py-1.5",
+          "text-[12px]",
+          "leading-4",
+          "tracking-[0.24px]",
+          "[&_svg]:size-4",
+        ].join(" "),
+
         default: [
           "h-12",
           "gap-2",
@@ -144,7 +188,7 @@ const buttonVariants = cva(
           "gap-2",
           "py-2.5",
           "pl-4",
-          "pr-6",
+          "pr-4",
           "text-xl",
           "leading-7",
           "[&_svg]:size-6",
@@ -181,8 +225,11 @@ interface ButtonProps
   extends ButtonPrimitive.Props,
   VariantProps<typeof buttonVariants> {
   horizontalPadding?: number;
+  verticalPadding?: number;
   radius?: FrameRadius;
   frameClassName?: string;
+  frameStrength?: FrameStrength | null;
+  square?: boolean;
 }
 
 function Button({
@@ -190,22 +237,39 @@ function Button({
   variant = "default",
   size = "default",
   horizontalPadding,
+  verticalPadding,
   radius = "pill",
   frameClassName,
+  frameStrength,
+  square = false,
   children,
   style,
   ...props
 }: ButtonProps) {
   const resolvedVariant = variant ?? "default";
 
+
+  const resolvedFrameStrength =
+    frameStrength !== undefined
+      ? frameStrength
+      : frameVariants[resolvedVariant];
+
+  const hasFrame = resolvedFrameStrength != null;
+
+  
   const button = (
     <ButtonPrimitive
       data-slot="button"
+      data-square={square ? "true" : undefined}
       className={cn(
         buttonVariants({
           variant: resolvedVariant,
           size,
         }),
+        hasFrame && [
+          "border-0",
+          "shadow-none",
+        ],
         className
       )}
       style={{
@@ -213,6 +277,12 @@ function Button({
           ? {
             paddingLeft: `${horizontalPadding}px`,
             paddingRight: `${horizontalPadding}px`,
+          }
+          : {}),
+        ...(verticalPadding !== undefined
+          ? {
+            paddingTop: `${verticalPadding}px`,
+            paddingBottom: `${verticalPadding}px`,
           }
           : {}),
         ...style,
@@ -223,14 +293,13 @@ function Button({
     </ButtonPrimitive>
   );
 
-  const frameStrength = frameVariants[resolvedVariant];
-
-  if (frameStrength) {
+  if (resolvedFrameStrength) {
     return (
       <Frame
-        strength={frameStrength}
+        strength={resolvedFrameStrength}
         radius={radius}
-        className={frameClassName}
+        visual={false}
+        className={cn("w-fit", frameClassName)}
       >
         {button}
       </Frame>

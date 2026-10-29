@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const CreateClientAccessKeySchema =
@@ -5,5 +6,10 @@ export const CreateClientAccessKeySchema =
         clientId: z
             .string()
             .trim()
-            .min(1),
+            .min(1, "Client ID is required."),
+
+        portfolioId: z
+            .string()
+            .trim()
+            .min(1, "Portfolio ID is required."),
     });

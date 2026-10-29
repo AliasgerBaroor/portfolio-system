@@ -1,9 +1,11 @@
+/* ========================================
+   DESKTOP — KEEP ORIGINAL LAYOUT
+======================================== */
+
 .floating-navigation {
     position: fixed;
-
     left: 50%;
     bottom: 32px;
-
     transform: translateX(-50%);
 
     display: flex;
@@ -12,6 +14,21 @@
 
     z-index: 20;
 }
+
+
+/* Menu trigger does NOT exist on desktop */
+.floating-navigation-trigger {
+    display: none;
+}
+
+
+/* Original desktop navigation */
+.floating-navigation-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 
 .floating-navigation-menu {
     display: flex;
@@ -24,8 +41,9 @@
 
     background: #fff;
 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
+
 
 .floating-navigation-item {
     display: flex;
@@ -36,7 +54,237 @@
 
     border-radius: 999px;
 
-    transition: .25s;
+    transition: 0.25s;
 
     border: none;
+}
+
+
+.floating-navigation-mobile-label {
+    display: none;
+}
+
+
+/* No overlay on desktop */
+.floating-navigation-overlay {
+    display: none;
+}
+
+
+/* Normal gallery — NO blur */
+.gallery {
+    transition:
+        filter 300ms ease,
+        transform 300ms ease;
+}
+
+
+/* ========================================
+   MOBILE ONLY
+======================================== */
+
+@media (max-width: 767px) {
+
+    /* ------------------------------------
+       NORMAL STATE
+       Menu is hidden
+       Gallery is NOT blurred
+    ------------------------------------ */
+
+    .floating-navigation {
+        display: none;
+
+        left: 50%;
+        bottom: 110px;
+
+        width: calc(100% - 32px);
+
+        transform: translateX(-50%);
+
+        z-index: 20;
+    }
+
+
+    /* ------------------------------------
+       MENU OPEN
+    ------------------------------------ */
+
+    .floating-navigation.is-open {
+        display: flex;
+    }
+
+
+body:has(.floating-navigation.is-open) .gallery {
+    filter: blur(24px);
+    transform: scale(1.03);
+}
+
+
+    /* ------------------------------------
+       OVERLAY
+    ------------------------------------ */
+
+    .floating-navigation-overlay {
+        display: block;
+
+        position: fixed;
+        inset: 0;
+
+        z-index: 19;
+
+        background: rgba(255, 255, 255, 0.25);
+
+        /* IMPORTANT: no backdrop blur */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+
+        pointer-events: auto;
+    }
+
+
+    /* ------------------------------------
+       MENU BUTTON
+       Only visible when menu is closed
+    ------------------------------------ */
+
+.floating-navigation-trigger {
+    display: block;
+    position: fixed;
+
+    left: 16px;
+    bottom: 24px;
+
+    transform: none;
+
+    z-index: 21;
+}
+
+    /* ------------------------------------
+       MOBILE MENU CONTENT
+    ------------------------------------ */
+
+    .floating-navigation-content {
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+
+        padding: 8px;
+
+        border: 2px solid #222;
+        border-radius: 24px;
+
+        background: #fff;
+        box-shadow: 0 6px 0 #222;
+    }
+
+
+    /* Remove desktop frames */
+    .floating-navigation-category-frame,
+    .floating-navigation-action-frame {
+        width: 100%;
+
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+
+        background: transparent !important;
+    }
+
+
+    /* ------------------------------------
+       CATEGORIES
+    ------------------------------------ */
+
+    .floating-navigation-categories {
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 2px;
+
+        padding: 0;
+
+        border: none;
+        border-radius: 0;
+
+        background: transparent;
+        box-shadow: none;
+    }
+
+
+    .floating-navigation-categories .floating-navigation-item {
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+
+        padding: 10px 16px;
+
+        border-radius: 999px;
+    }
+
+
+    /* ------------------------------------
+       ACTIONS
+    ------------------------------------ */
+
+    .floating-navigation-action-frame {
+        margin-top: 8px;
+
+        padding-top: 12px;
+        padding-bottom: 8px;
+
+        border-top: 1px solid #ddd !important;
+    }
+
+
+    .floating-navigation-actions {
+        width: 100%;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        align-items: center;
+
+        padding: 0 4px;
+
+        border: none;
+        border-radius: 0;
+
+        background: transparent;
+        box-shadow: none;
+    }
+
+
+    .floating-navigation-actions .floating-navigation-item {
+        width: 100% !important;
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 10px 12px;
+    }
+
+
+    /* Show labels on mobile */
+    .floating-navigation-mobile-label {
+        display: block;
+    }
+
+
+    /* ------------------------------------
+       CLOSE BUTTON
+    ------------------------------------ */
+
+    .floating-navigation-close {
+        position: absolute;
+        bottom: -86px;
+    }
 }

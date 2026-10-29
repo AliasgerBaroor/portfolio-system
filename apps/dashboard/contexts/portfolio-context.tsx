@@ -35,6 +35,10 @@ type PortfolioContextType = {
     updatePortfolio: (
         data: UpdatePortfolioRequest
     ) => Promise<void>;
+
+    publishPortfolio: () => Promise<void>;
+
+    deletePortfolio: () => Promise<void>;
 };
 
 const PortfolioContext =
@@ -101,6 +105,19 @@ export function PortfolioProvider({
         setPortfolio(response.portfolio);
     }
     
+    async function publishPortfolio() {
+        const response =
+            await portfolioService.publishPortfolio();
+
+        setPortfolio(response.portfolio);
+    }
+
+    async function deletePortfolio() {
+        await portfolioService.deletePortfolio();
+
+        setPortfolio(null);
+    }
+
     useEffect(() => {
         async function loadPortfolio() {
             if (initializing) {
@@ -124,14 +141,12 @@ export function PortfolioProvider({
     const value = useMemo(
         () => ({
             portfolio,
-
             loading,
-
             getPortfolio,
-
             createPortfolio,
-
             updatePortfolio,
+            publishPortfolio,
+            deletePortfolio,
         }),
         [portfolio, loading]
     );

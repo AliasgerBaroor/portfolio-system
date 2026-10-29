@@ -10,18 +10,38 @@ import {
     hashClientSessionToken,
 } from "../../utils/hash-client-session-token";
 
+/*
+ * A browser/device session lasts for 24 hours.
+ *
+ * This is the SESSION lifetime.
+ *
+ * ClientAccessKey.expiresAt is still the
+ * maximum lifetime of the credential itself.
+ */
+const CLIENT_SESSION_LIFETIME_MS =
+    24 * 60 * 60 * 1000;
+
 export async function loginClientAccess(
     portfolioSlug: string,
     password: string,
     fingerprint: string,
+    credentialId: string,
     ip?: string,
     userAgent?: string
 ) {
+    /*
+     * --------------------------------------------------
+     * 1. Find the portfolio
+     * --------------------------------------------------
+     */
+
     const portfolio =
         await prisma.portfolio.findFirst({
             where: {
                 slug: portfolioSlug,
+
                 deletedAt: null,
+
                 isPublished: true,
             },
         });
@@ -32,73 +52,79 @@ export async function loginClientAccess(
         );
     }
 
-    const accessRules =
-        await prisma.portfolioClientAccess.findMany({
+    const now = new Date();
+
+    /*
+     * --------------------------------------------------
+     * 2. Find the ClientAccessKey
+     * --------------------------------------------------
+     *
+     * The credentialId identifies the long-lived
+     * access configuration.
+     *
+     * The key must:
+     *
+     * - belong to this portfolio
+     * - be active
+     * - not be deleted
+     * - not be expired
+     */
+
+    const accessKey =
+        await prisma.clientAccessKey.findFirst({
             where: {
-                portfolioId: portfolio.id,
-            },
-            include: {
-                accessKey: true,
+                credentialId,
+
+                isActive: true,
+
+                deletedAt: null,
+
+                expiresAt: {
+                    gt: now,
+                },
+
+                portfolios: {
+                    some: {
+                        portfolioId:
+                            portfolio.id,
+                    },
+                },
             },
         });
 
-    const now = new Date();
-
-    let matchedAccessKey = null;
-
-    for (const rule of accessRules) {
-        const accessKey = rule.accessKey;
-
-        if (!accessKey.isActive) {
-            continue;
-        }
-
-        if (
-            accessKey.deletedAt !== null
-        ) {
-            continue;
-        }
-
-        if (
-            accessKey.expiresAt <= now
-        ) {
-            continue;
-        }
-
-        const passwordMatches =
-            await bcrypt.compare(
-                password,
-                accessKey.passwordHash
-            );
-
-        if (passwordMatches) {
-            matchedAccessKey =
-                accessKey;
-
-            break;
-        }
+    if (!accessKey) {
+        throw new Error(
+            "Invalid portfolio access."
+        );
     }
 
     /*
-     * No valid access key matched
+     * --------------------------------------------------
+     * 3. Verify password
+     * --------------------------------------------------
      */
-    if (!matchedAccessKey) {
-        const firstAccessRule =
-            accessRules.at(0);
 
-        if (firstAccessRule) {
-            await prisma.clientAccessLog.create({
-                data: {
-                    accessKeyId:
-                        firstAccessRule.accessKeyId,
+    const passwordMatches =
+        await bcrypt.compare(
+            password,
+            accessKey.passwordHash
+        );
 
-                    fingerprint,
-                    ip,
-                    userAgent,
-                    success: false,
-                },
-            });
-        }
+    if (!passwordMatches) {
+        await prisma.clientAccessLog.create({
+            data: {
+                accessKeyId:
+                    accessKey.id,
+
+                fingerprint,
+
+                ip,
+
+                userAgent,
+
+                success: false,
+            },
+        });
 
         throw new Error(
             "Invalid portfolio access."
@@ -106,15 +132,18 @@ export async function loginClientAccess(
     }
 
     /*
-     * From this point onward TypeScript knows
-     * the access key exists.
+     * --------------------------------------------------
+     * 4. Remove existing session for this device
+     * --------------------------------------------------
+     *
+     * Because:
+     *
+     * @@unique([accessKeyId, fingerprint])
+     *
+     * only one active session can exist for this
+     * access key + device combination.
      */
-    const accessKey = matchedAccessKey;
 
-    /*
-     * Remove an existing session for this
-     * same device so we can issue a fresh token.
-     */
     const existingSession =
         await prisma.clientAccessSession.findUnique({
             where: {
@@ -136,8 +165,13 @@ export async function loginClientAccess(
     }
 
     /*
-     * Check device limit.
+     * --------------------------------------------------
+     * 5. Check device limit
+     * --------------------------------------------------
+     *
+     * Only sessions that have not expired count.
      */
+
     const activeSessions =
         await prisma.clientAccessSession.count({
             where: {
@@ -160,8 +194,51 @@ export async function loginClientAccess(
     }
 
     /*
-     * Generate a new client session token.
+     * --------------------------------------------------
+     * 6. Calculate SESSION expiration
+     * --------------------------------------------------
+     *
+     * Normal session:
+     *
+     *     now + 24 hours
+     *
+     * BUT:
+     *
+     *     session must NEVER outlive the
+     *     ClientAccessKey.
+     *
+     * Therefore:
+     *
+     * session.expiresAt =
+     *     min(
+     *         now + 24 hours,
+     *         accessKey.expiresAt
+     *     )
      */
+
+    const requestedSessionExpiry =
+        new Date(
+            now.getTime() +
+            CLIENT_SESSION_LIFETIME_MS
+        );
+
+    const sessionExpiresAt =
+        requestedSessionExpiry <
+            accessKey.expiresAt
+            ? requestedSessionExpiry
+            : accessKey.expiresAt;
+
+    /*
+     * --------------------------------------------------
+     * 7. Generate session token
+     * --------------------------------------------------
+     *
+     * The RAW token is only used to create the
+     * HttpOnly cookie.
+     *
+     * We store ONLY the hash in the database.
+     */
+
     const sessionToken =
         generateClientSessionToken();
 
@@ -171,9 +248,11 @@ export async function loginClientAccess(
         );
 
     /*
-     * Create session + audit log + usage update
-     * atomically.
+     * --------------------------------------------------
+     * 8. Create session + audit log + usage update
+     * --------------------------------------------------
      */
+
     const session =
         await prisma.$transaction(
             async (tx) => {
@@ -191,8 +270,15 @@ export async function loginClientAccess(
 
                             userAgent,
 
+                            /*
+                             * IMPORTANT:
+                             *
+                             * This is now the actual
+                             * browser/device session
+                             * expiration.
+                             */
                             expiresAt:
-                                accessKey.expiresAt,
+                                sessionExpiresAt,
                         },
                     });
 
@@ -231,8 +317,20 @@ export async function loginClientAccess(
             }
         );
 
+    /*
+     * --------------------------------------------------
+     * 9. Return safe session information
+     * --------------------------------------------------
+     *
+     * sessionToken will be consumed by the backend
+     * route and placed into an HttpOnly cookie.
+     *
+     * The frontend receives expiresAt only.
+     */
+
     return {
         sessionToken,
+
         expiresAt:
             session.expiresAt,
     };

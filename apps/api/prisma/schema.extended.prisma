@@ -1,0 +1,948 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  PASSWORD
+  UNLISTED
+}
+
+enum SectionType {
+  HERO
+  PROJECTS
+  ABOUT
+  EXPERIENCE
+  CONTACT
+  CUSTOM
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+/// Shared data types used by reusable content/form templates and dynamic DB fields.
+enum FieldDataType {
+  STRING
+  TEXT
+  RICH_TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+  DATETIME
+  URL
+  EMAIL
+  PASSWORD
+  FILE
+  IMAGE
+  OBJECT
+  ARRAY
+  ENUM
+  JSON
+}
+
+enum CmsTemplateKind {
+  CONTENT
+  FORM
+}
+
+enum DbRelationshipType {
+  ONE_TO_ONE
+  ONE_TO_MANY
+  MANY_TO_ONE
+  MANY_TO_MANY
+}
+
+model Session {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshTokenHash String @unique
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lastSeenAt DateTime?
+
+  @@index([userId])
+}
+
+model ProjectOverview {
+  id String @id @default(cuid())
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  logo String?
+
+  category String? // Travel
+
+  shortDescription String?
+
+  collaborators String?
+
+  scope String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectGalleryImage {
+  id String @id @default(cuid())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  imageUrl String
+
+  alt String?
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, sortOrder])
+}
+
+model Project {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  title String
+  slug  String @unique
+
+  summary    String?
+  content    String?
+  coverImage String?
+
+  visibility Visibility @default(PUBLIC)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  isPublished Boolean @default(false)
+  isArchived  Boolean @default(false)
+
+  accessRules ProjectClientAccess[]
+
+  details       ProjectOverview?
+  galleryImages ProjectGalleryImage[]
+
+  tags                ProjectTagAssignment[]
+  portfolioCategories ProjectPortfolioCategory[]
+
+  @@index([portfolioId])
+  @@index([visibility])
+}
+
+// TODO
+//ProjectMetric
+//ProjectTechnology
+
+model PortfolioClientAccess {
+  accessKeyId String
+  portfolioId String
+
+  accessKey ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@id([accessKeyId, portfolioId])
+  @@index([portfolioId])
+  @@index([accessKeyId])
+}
+
+model ProjectClientAccess {
+  accessKeyId String
+  projectId   String
+
+  accessKey ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([accessKeyId, projectId])
+  @@index([projectId])
+  @@index([accessKeyId])
+}
+
+model Client {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name    String
+  company String?
+  email   String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  accessKeys ClientAccessKey[]
+
+  accessRequests      ClientAccessRequest[]
+  portfolioCategories ClientPortfolioCategory[]
+
+  @@index([ownerId])
+  @@index([email])
+}
+
+/// Password-protected access for clients.
+model ClientAccessKey {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  name String
+
+  passwordHash      String
+  encryptedPassword String
+
+  credentialId String @unique
+
+  expiresAt  DateTime
+  lastSeenAt DateTime?
+
+  maxUses     Int?
+  deviceLimit Int  @default(1)
+  usedCount   Int  @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  sessions ClientAccessSession[]
+
+  portfolios PortfolioClientAccess[]
+  projects   ProjectClientAccess[]
+
+  lastUsedAt DateTime?
+  logs       ClientAccessLog[]
+
+  @@index([ownerId])
+  @@index([clientId])
+}
+
+model ClientAccessSession {
+  id String @id @default(cuid())
+
+  accessKeyId String
+  accessKey   ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  sessionTokenHash String @unique
+
+  fingerprint String
+
+  ip String?
+
+  createdAt DateTime @default(now())
+
+  expiresAt DateTime
+
+  userAgent String?
+
+  deviceName String?
+
+  @@unique([accessKeyId, fingerprint])
+  @@index([accessKeyId])
+}
+
+model ClientAccessRequest {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  name    String
+  email   String
+  company String?
+
+  message String?
+
+  status AccessRequestStatus @default(PENDING)
+
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([portfolioId])
+  @@index([clientId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Portfolio {
+  id String @id @default(cuid())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  title String
+
+  slug String @unique
+
+  visibility  Visibility @default(PUBLIC)
+  isPublished Boolean    @default(false)
+  isArchived  Boolean    @default(false)
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  projects Project[]
+
+  accessRules PortfolioClientAccess[]
+
+  sections PortfolioSection[]
+
+  accessRequests ClientAccessRequest[]
+  categories     PortfolioCategory[]
+
+  updatedAt DateTime @updatedAt
+
+  theme String?
+
+  customDomain String? @unique
+
+  favicon String?
+
+  seoTitle String?
+
+  seoDescription String?
+
+  // ============================================================
+// NEW CMS
+// ============================================================
+
+cmsCollections CmsCollection[]
+
+  // Reusable section/form templates and uploaded assets.
+  cmsSectionTemplates CmsSectionTemplate[]
+  cmsAssets           CmsAsset[]
+
+  // Dynamic data schemas for app-specific tables and records.
+  dbSchemas DbSchema[]
+  // ============================================================
+// CLOSE NEW CMS
+// ============================================================
+
+
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model PortfolioSection {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type SectionType
+
+  title String
+  slug  String
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  isLandingVisible Boolean @default(false)
+
+  blocks PortfolioContentBlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+  @@index([portfolioId, sortOrder])
+}
+
+enum ContentBlockType {
+  TEXT
+  RICH_TEXT
+  BULLET_LIST
+  QUOTE
+  IMAGE
+  VIDEO
+}
+
+model PortfolioContentBlock {
+  id String @id @default(cuid())
+
+  sectionId String
+  section   PortfolioSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  type ContentBlockType
+
+  title   String?
+  content Json?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sectionId])
+  @@index([sectionId, sortOrder])
+}
+
+model PortfolioCategory {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  name String
+  slug String
+
+  sortOrder Int @default(0)
+
+  clients  ClientPortfolioCategory[]
+  projects ProjectPortfolioCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+}
+
+model ClientPortfolioCategory {
+  clientId   String
+  categoryId String
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  category PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, categoryId])
+  @@index([categoryId])
+}
+
+model ProjectPortfolioCategory {
+  projectId  String
+  categoryId String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  category PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, categoryId])
+  @@index([categoryId])
+}
+
+model User {
+  id String @id @default(cuid())
+
+  email        String @unique
+  passwordHash String
+
+  username    String  @unique
+  fullName    String
+  displayName String
+  avatar      String?
+
+  bio String?
+
+  isActive Boolean @default(true)
+
+  role UserRole @default(ADMIN)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  portfolios Portfolio[]
+  sessions   Session[]
+  clients    Client[]
+  accessKeys ClientAccessKey[]
+
+  lastLoginAt DateTime?
+
+  @@index([username])
+}
+
+model ClientAccessLog {
+  id String @id @default(cuid())
+
+  accessKeyId String
+  accessKey   ClientAccessKey @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  ip String?
+
+  fingerprint String?
+
+  userAgent String?
+
+  success Boolean
+
+  country String?
+
+  city String?
+
+  browser String?
+
+  os String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accessKeyId])
+  @@index([createdAt])
+}
+
+model ProjectTag {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  projects ProjectTagAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectTagAssignment {
+  projectId String
+  tagId     String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tag ProjectTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
+}
+
+
+
+
+// ============================================================
+// NEW CMS — CURRENT
+// ============================================================
+//
+// Scalable hierarchy:
+//
+// Portfolio
+//   └── CmsCollection
+//         └── CmsItem
+//               └── CmsSection
+//                     └── CmsBlock
+//
+// Collection = content type/group
+// Item       = individual entry
+// Section    = structural group inside an item
+// Block      = actual content
+//
+// ============================================================
+
+model CmsCollection {
+    id String @id @default(cuid())
+
+    portfolioId String
+    portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+    name String
+    slug String
+    description String?
+
+    // System collections are created automatically by the platform
+    // and cannot be deleted through normal CMS operations.
+    isSystem Boolean @default(false)
+
+    isEnabled Boolean @default(true)
+    sortOrder Int @default(0)
+
+    items CmsItem[]
+
+    // Optional link for a collection used as the visible entry point for a DB schema.
+    dbSchema DbSchema?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([portfolioId, slug])
+    @@index([portfolioId])
+    @@index([portfolioId, sortOrder])
+}
+
+
+model CmsItem {
+  id String @id @default(cuid())
+
+  collectionId String
+  collection CmsCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  title String
+  slug String
+
+  description String?
+
+  // Flexible item-level metadata/content.
+  data Json?
+
+  isPublished Boolean @default(false)
+  isVisible Boolean @default(true)
+
+  sortOrder Int @default(0)
+
+  sections CmsSection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([collectionId, slug])
+  @@index([collectionId])
+  @@index([collectionId, sortOrder])
+  @@index([collectionId, isPublished])
+}
+
+
+model CmsSection {
+  id String @id @default(cuid())
+
+  itemId String
+  item CmsItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  title String
+  slug String
+
+  // Flexible instead of the OLD fixed SectionType enum.
+  type String?
+
+  // Optional reusable template that defines this section's generated form.
+  templateId String?
+  template   CmsSectionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  // Values entered into the template-defined fields for this section instance.
+  data Json?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+  isSystem Boolean @default(false)
+
+  blocks CmsBlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([itemId, slug])
+  @@index([itemId])
+  @@index([itemId, sortOrder])
+  @@index([templateId])
+}
+
+
+model CmsBlock {
+  id String @id @default(cuid())
+
+  sectionId String
+  section CmsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // Examples:
+  // text
+  // rich-text
+  // image
+  // video
+  // gallery
+  // button
+  // custom
+  type String
+
+  title String?
+
+  // Block-specific data.
+  content Json?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sectionId])
+  @@index([sectionId, sortOrder])
+}
+
+// ============================================================
+// REUSABLE SECTION TEMPLATES, FIELD DEFINITIONS AND ASSETS
+// ============================================================
+// A template defines the fields/form. A CmsSection references the template
+// and stores its own values in CmsSection.data. CmsBlock remains available for
+// presentation/content blocks and backwards compatibility.
+
+model CmsSectionTemplate {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+  kind        CmsTemplateKind @default(CONTENT)
+
+  // Increment when the template definition changes. Application code should
+  // manage migrations/compatibility for existing section data.
+  version Int @default(1)
+
+  isSystem  Boolean @default(false)
+  isEnabled Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  fields    CmsTemplateField[]
+  sections  CmsSection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+  @@index([portfolioId, sortOrder])
+  @@index([portfolioId, kind, isEnabled])
+}
+
+model CmsTemplateField {
+  id String @id @default(cuid())
+
+  templateId String
+  template   CmsSectionTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  // Recursive fields support Object and Array field children.
+  parentId String?
+  parent   CmsTemplateField?  @relation("CmsTemplateFieldTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children CmsTemplateField[] @relation("CmsTemplateFieldTree")
+
+  key         String
+  label       String
+  description String?
+  type        FieldDataType
+
+  isRequired Boolean @default(false)
+  isUnique   Boolean @default(false)
+  isVisible  Boolean @default(true)
+  sortOrder  Int     @default(0)
+
+  // UI hints (placeholder, help text, display options) and defaults.
+  config       Json?
+  defaultValue Json?
+
+  // Declarative rules, e.g. [{"type":"email"},
+  // {"type":"domainAllowlist","values":["gmail.com","logifex.com"]}].
+  constraints Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([templateId, sortOrder])
+  @@index([parentId, sortOrder])
+  @@index([templateId, key])
+}
+
+/// Uploaded file metadata. The actual bytes live in the configured storage provider.
+model CmsAsset {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  name        String
+  storageKey  String
+  publicUrl   String?
+  mimeType    String
+  sizeBytes   BigInt
+  alt         String?
+  width       Int?
+  height      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, storageKey])
+  @@index([portfolioId])
+  @@index([mimeType])
+}
+
+// ============================================================
+// DYNAMIC DB SCHEMAS — TABLES, FIELDS, RELATIONSHIPS AND RECORDS
+// ============================================================
+// These models define logical user-created tables. They do NOT create a new
+// physical PostgreSQL table for every DbTable. DbRecord.data stores values as
+// JSON and the application validates them against DbField definitions.
+
+model DbSchema {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  // Optional link to a CmsCollection named "DB" in the CMS interface.
+  collectionId String?        @unique
+  collection   CmsCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  name        String
+  slug        String
+  description String?
+  isEnabled   Boolean @default(true)
+
+  tables        DbTable[]
+  relationships DbRelationship[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+}
+
+model DbTable {
+  id String @id @default(cuid())
+
+  schemaId String
+  schema   DbSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+  isEnabled   Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  fields  DbField[]
+  records DbRecord[]
+
+  sourceRelationships DbRelationship[] @relation("DbRelationshipSource")
+  targetRelationships DbRelationship[] @relation("DbRelationshipTarget")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([schemaId, slug])
+  @@index([schemaId, sortOrder])
+}
+
+model DbField {
+  id String @id @default(cuid())
+
+  tableId String
+  table   DbTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  // Recursive children support nested Object and Array fields.
+  parentId String?
+  parent   DbField?  @relation("DbFieldTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children DbField[] @relation("DbFieldTree")
+
+  key         String
+  label       String
+  description String?
+  type        FieldDataType
+
+  isRequired Boolean @default(false)
+  isUnique   Boolean @default(false)
+  isIndexed  Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  config       Json?
+  defaultValue Json?
+  constraints  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tableId, sortOrder])
+  @@index([parentId, sortOrder])
+  @@index([tableId, key])
+}
+
+model DbRelationship {
+  id String @id @default(cuid())
+
+  schemaId String
+  schema   DbSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        DbRelationshipType
+  description String?
+
+  sourceTableId String
+  sourceTable   DbTable @relation("DbRelationshipSource", fields: [sourceTableId], references: [id], onDelete: Cascade)
+
+  targetTableId String
+  targetTable   DbTable @relation("DbRelationshipTarget", fields: [targetTableId], references: [id], onDelete: Cascade)
+
+  // Field IDs are logical references into DbField definitions. Validate that
+  // they belong to the expected table in application code.
+  sourceFieldId String?
+  targetFieldId String?
+
+  // Additional behavior, e.g. onDelete policy or join-table settings.
+  config Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([schemaId, name])
+  @@index([sourceTableId])
+  @@index([targetTableId])
+  @@index([schemaId])
+}
+
+model DbRecord {
+  id String @id @default(cuid())
+
+  tableId String
+  table   DbTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  // Optional stable external identifier for API consumers.
+  externalId String?
+  data       Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([tableId, externalId])
+  @@index([tableId, createdAt])
+  @@index([tableId, deletedAt])
+}

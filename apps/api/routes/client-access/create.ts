@@ -6,6 +6,7 @@ import { CreateClientAccessKeySchema } from "../../validators/client-access-key"
 
 import { createClientAccessKey } from "../../services/client-access-key/client-access-key.service";
 import { toClientAccessKeyResponse } from "../../mappers/client-access-key.mapper";
+import { env } from "../../lib/env";
 
 const create = new Hono();
 
@@ -40,10 +41,19 @@ create.post(
 
             return c.json({
                 success: true,
+
                 password: response.password,
-                accessKey: toClientAccessKeyResponse(
-                    response.accessKey
-                ),
+
+                credentialId:
+                    response.credentialId,
+
+                accessUrl:
+                    `${env.FRONTEND_URL}/access/${response.credentialId}`,
+
+                accessKey:
+                    toClientAccessKeyResponse(
+                        response.accessKey
+                    ),
             });
         } catch (error) {
             return c.json(

@@ -121,10 +121,10 @@ model Project {
   details       ProjectOverview?
   galleryImages ProjectGalleryImage[]
 
-  tags ProjectTagAssignment[]
+  tags                ProjectTagAssignment[]
+  portfolioCategories ProjectPortfolioCategory[]
 
   @@index([portfolioId])
-  @@index([slug])
   @@index([visibility])
 }
 
@@ -176,7 +176,8 @@ model Client {
 
   accessKeys ClientAccessKey[]
 
-  accessRequests ClientAccessRequest[]
+  accessRequests      ClientAccessRequest[]
+  portfolioCategories ClientPortfolioCategory[]
 
   @@index([ownerId])
   @@index([email])
@@ -197,7 +198,7 @@ model ClientAccessKey {
   passwordHash      String
   encryptedPassword String
 
-  accessToken String @unique
+  credentialId String @unique
 
   expiresAt  DateTime
   lastSeenAt DateTime?
@@ -222,7 +223,6 @@ model ClientAccessKey {
 
   @@index([ownerId])
   @@index([clientId])
-  @@index([accessToken])
 }
 
 model ClientAccessSession {
@@ -267,8 +267,8 @@ model ClientAccessRequest {
   status AccessRequestStatus @default(PENDING)
 
   reviewedAt DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([portfolioId])
   @@index([clientId])
@@ -300,6 +300,7 @@ model Portfolio {
   sections PortfolioSection[]
 
   accessRequests ClientAccessRequest[]
+  categories     PortfolioCategory[]
 
   updatedAt DateTime @updatedAt
 
@@ -312,6 +313,16 @@ model Portfolio {
   seoTitle String?
 
   seoDescription String?
+
+  // ============================================================
+// NEW CMS
+// ============================================================
+
+cmsCollections CmsCollection[]
+  // ============================================================
+// CLOSE NEW CMS
+// ============================================================
+
 
   @@index([ownerId])
   @@index([slug])
@@ -326,14 +337,15 @@ model PortfolioSection {
   type SectionType
 
   title String
-
-  slug String
+  slug  String
 
   sortOrder Int @default(0)
 
   isVisible Boolean @default(true)
 
-  settings Json?
+  isLandingVisible Boolean @default(false)
+
+  blocks PortfolioContentBlock[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -341,6 +353,82 @@ model PortfolioSection {
   @@unique([portfolioId, slug])
   @@index([portfolioId])
   @@index([portfolioId, sortOrder])
+}
+
+enum ContentBlockType {
+  TEXT
+  RICH_TEXT
+  BULLET_LIST
+  QUOTE
+  IMAGE
+  VIDEO
+}
+
+model PortfolioContentBlock {
+  id String @id @default(cuid())
+
+  sectionId String
+  section   PortfolioSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  type ContentBlockType
+
+  title   String?
+  content Json?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sectionId])
+  @@index([sectionId, sortOrder])
+}
+
+model PortfolioCategory {
+  id String @id @default(cuid())
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  name String
+  slug String
+
+  sortOrder Int @default(0)
+
+  clients  ClientPortfolioCategory[]
+  projects ProjectPortfolioCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+}
+
+model ClientPortfolioCategory {
+  clientId   String
+  categoryId String
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  category PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, categoryId])
+  @@index([categoryId])
+}
+
+model ProjectPortfolioCategory {
+  projectId  String
+  categoryId String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  category PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, categoryId])
+  @@index([categoryId])
 }
 
 model User {
@@ -424,4 +512,146 @@ model ProjectTagAssignment {
 
   @@id([projectId, tagId])
   @@index([tagId])
+}
+
+
+
+
+// ============================================================
+// NEW CMS — CURRENT
+// ============================================================
+//
+// Scalable hierarchy:
+//
+// Portfolio
+//   └── CmsCollection
+//         └── CmsItem
+//               └── CmsSection
+//                     └── CmsBlock
+//
+// Collection = content type/group
+// Item       = individual entry
+// Section    = structural group inside an item
+// Block      = actual content
+//
+// ============================================================
+
+model CmsCollection {
+    id String @id @default(cuid())
+
+    portfolioId String
+    portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+    name String
+    slug String
+    description String?
+
+    // System collections are created automatically by the platform
+    // and cannot be deleted through normal CMS operations.
+    isSystem Boolean @default(false)
+
+    isEnabled Boolean @default(true)
+    sortOrder Int @default(0)
+
+    items CmsItem[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([portfolioId, slug])
+    @@index([portfolioId])
+    @@index([portfolioId, sortOrder])
+}
+
+
+model CmsItem {
+  id String @id @default(cuid())
+
+  collectionId String
+  collection CmsCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  title String
+  slug String
+
+  description String?
+
+  // Flexible item-level metadata/content.
+  data Json?
+
+  isPublished Boolean @default(false)
+  isVisible Boolean @default(true)
+
+  sortOrder Int @default(0)
+
+  sections CmsSection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([collectionId, slug])
+  @@index([collectionId])
+  @@index([collectionId, sortOrder])
+  @@index([collectionId, isPublished])
+}
+
+
+model CmsSection {
+  id String @id @default(cuid())
+
+  itemId String
+  item CmsItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  title String
+  slug String
+
+  // Flexible instead of the OLD fixed SectionType enum.
+  type String?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+  isSystem Boolean @default(false)
+
+  blocks CmsBlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([itemId, slug])
+  @@index([itemId])
+  @@index([itemId, sortOrder])
+}
+
+
+model CmsBlock {
+  id String @id @default(cuid())
+
+  sectionId String
+  section CmsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // Examples:
+  // text
+  // rich-text
+  // image
+  // video
+  // gallery
+  // button
+  // custom
+  type String
+
+  title String?
+
+  // Block-specific data.
+  content Json?
+
+  sortOrder Int @default(0)
+
+  isVisible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sectionId])
+  @@index([sectionId, sortOrder])
 }

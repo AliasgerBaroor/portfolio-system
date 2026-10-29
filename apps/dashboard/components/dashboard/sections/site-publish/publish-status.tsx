@@ -1,4 +1,4 @@
-import { Typography } from "@workspace/ui/components/typography"
+import { Typography } from "@workspace/ui/components/typography/typography"
 
 function PublishStatus() {
     return (

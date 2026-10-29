@@ -1,6 +1,6 @@
 "use client";
 import { Globe, Lock } from "lucide-react";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { Card } from "@workspace/ui/components/card";
 import { OptionCard } from "@workspace/ui/components/option-card";
 import { usePortfolio } from "@/contexts/portfolio-context";

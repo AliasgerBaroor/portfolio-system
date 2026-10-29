@@ -54,8 +54,8 @@
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --radius-pill: var(--radius-pill);
-  --font-sans: var(--font-sans);
-  --font-heading: var(--font-heading);
+--font-sans: var(--font-switzer);
+  --font-heading: var(--font-delight);
   --text-2xs: 0.75rem;
 }
 

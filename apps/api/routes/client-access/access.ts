@@ -29,10 +29,11 @@ access.post("/:slug/access", async (c) => {
                 slug,
                 result.data.password,
                 result.data.fingerprint,
+                result.data.credentialId,
                 c.req.header("x-forwarded-for"),
                 c.req.header("user-agent")
             );
-
+            
         return c.json({
             success: true,
             sessionToken:

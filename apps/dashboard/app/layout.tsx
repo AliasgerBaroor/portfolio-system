@@ -55,7 +55,7 @@ const switzer = localFont({
       style: "normal",
     },
   ],
-  variable: "--font-sans",
+  variable: "--font-switzer",
   display: "swap",
 });
 
@@ -107,7 +107,7 @@ const delight = localFont({
       style: "normal",
     },
   ],
-  variable: "--font-heading",
+  variable: "--font-delight",
   display: "swap",
 });
 

@@ -22,13 +22,16 @@ import { useAuth } from "@/contexts/auth-context";
 
 type ClientContextType = {
     clients: Client[];
-
     loading: boolean;
 
     getClients: () => Promise<void>;
 
     createClient: (
         data: CreateClientRequest
+    ) => Promise<void>;
+
+    removeClient: (
+        clientId: string
     ) => Promise<void>;
 };
 
@@ -80,10 +83,25 @@ export function ClientProvider({
         const response =
             await clientService.createClient(data);
 
-        setClients((prev) => [
+        setClients((current) => [
             response.client,
-            ...prev,
+            ...current,
         ]);
+    }
+
+    async function removeClient(
+        clientId: string
+    ) {
+        await clientService.removeClient(
+            clientId
+        );
+
+        setClients((current) =>
+            current.filter(
+                (client) =>
+                    client.id !== clientId
+            )
+        );
     }
 
     useEffect(() => {
@@ -115,6 +133,7 @@ export function ClientProvider({
             loading,
             getClients,
             createClient,
+            removeClient,
         }),
         [clients, loading]
     );

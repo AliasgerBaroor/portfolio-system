@@ -13,6 +13,8 @@ function required(name: string) {
 
 export const env = {
     DATABASE_URL: required("DATABASE_URL"),
+    
+    FRONTEND_URL: required("FRONTEND_URL"),
 
     JWT_ACCESS_SECRET: required("JWT_ACCESS_SECRET"),
     JWT_REFRESH_SECRET: required("JWT_REFRESH_SECRET"),

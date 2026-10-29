@@ -12,42 +12,34 @@ import {
     encryptClientPassword,
     decryptClientPassword,
 } from "../../utils/encrypt-client-password";
+import { generateClientCredentialId } from "../../lib/generate-client-credential-id";
 
 export async function createClientAccessKey(
     userId: string,
     data: CreateClientAccessKeyDto
 ) {
+
+    const frontendUrl =
+        process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+        throw new Error(
+            "FRONTEND_URL is not configured."
+        );
+    }
+
     const portfolio =
         await prisma.portfolio.findFirst({
             where: {
+                id: data.portfolioId,
                 ownerId: userId,
                 deletedAt: null,
             },
         });
 
     if (!portfolio) {
-        throw new Error(
-            "Portfolio not found."
-        );
+        throw new Error("Portfolio not found.");
     }
-
-    const password =
-        generateClientPassword();
-
-    const passwordHash =
-        await bcrypt.hash(password, 12);
-
-    const encryptedPassword =
-        encryptClientPassword(password);
-
-    const accessToken =
-        generateAccessToken();
-
-    const expiresAt =
-        new Date(
-            Date.now() +
-            24 * 60 * 60 * 1000
-        );
 
     const client =
         await prisma.client.findFirst({
@@ -60,62 +52,78 @@ export async function createClientAccessKey(
         });
 
     if (!client) {
-        throw new Error(
-            "Client not found."
-        );
+        throw new Error("Client not found.");
     }
 
+    const password = generateClientPassword();
+
+    const passwordHash =
+        await bcrypt.hash(password, 12);
+
+    const encryptedPassword =
+        encryptClientPassword(password);
+
+    const accessToken = generateAccessToken();
+
+    const credentialId =
+        generateClientCredentialId();
+
+    const expiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+    );
 
     const accessKey =
-        await prisma.$transaction(
-            async (tx) => {
-                const key =
-                    await tx.clientAccessKey.create({
-                        data: {
-                            ownerId: userId,
-                            clientId: client.id,
-                            name: client.name,
-                            passwordHash,
-                            encryptedPassword,
-                            accessToken,
-                            expiresAt,
-                        },
-                    });
-
-                await tx.portfolioClientAccess.create({
+        await prisma.$transaction(async (tx) => {
+            const key =
+                await tx.clientAccessKey.create({
                     data: {
-                        accessKeyId: key.id,
-
-                        portfolioId: portfolio.id,
+                        ownerId: userId,
+                        clientId: client.id,
+                        name: client.name,
+                        accessToken,
+                        credentialId,
+                        passwordHash,
+                        encryptedPassword,
+                        expiresAt,
+                        deviceLimit: 1,
                     },
                 });
 
-                return key;
-            }
-        );
+            await tx.portfolioClientAccess.create({
+                data: {
+                    accessKeyId: key.id,
+                    portfolioId: portfolio.id,
+                },
+            });
+
+            return key;
+        });
 
     return {
         accessKey,
-
         password,
+        credentialId,
+        accessUrl:
+            `${frontendUrl.replace(/\/$/, "")}` +
+            `/${portfolio.slug}/access/${credentialId}`,
     };
 }
 
 export async function getClientAccessKeys(
-    userId: string
+    userId: string,
+    portfolioId: string
 ) {
     const portfolio =
         await prisma.portfolio.findFirst({
             where: {
+                id: portfolioId,
                 ownerId: userId,
                 deletedAt: null,
             },
         });
 
     if (!portfolio) {
-        throw new Error(
-            "Portfolio not found."
-        );
+        throw new Error("Portfolio not found.");
     }
 
     const portfolioAccess =
@@ -123,7 +131,6 @@ export async function getClientAccessKeys(
             where: {
                 portfolioId: portfolio.id,
                 accessKey: {
-                    isActive: true,
                     deletedAt: null,
                 },
             },
@@ -200,7 +207,6 @@ export async function revokeClientAccessKey(
                 },
                 data: {
                     isActive: false,
-                    deletedAt: new Date(),
                 },
             });
 

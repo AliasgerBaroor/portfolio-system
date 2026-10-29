@@ -27,8 +27,6 @@ refresh.post("/", async (c) => {
         const auth =
             await refreshUserSession(refreshToken);
 
-        setRefreshCookie(c, auth.refreshToken);
-
         return c.json({
             success: true,
 

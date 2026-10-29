@@ -2,7 +2,6 @@ import api from "@/lib/api";
 
 import {
     getClientDeviceId,
-    setClientSession,
     clearClientSession,
 } from "@/lib/client-session";
 
@@ -14,7 +13,8 @@ import type {
 class ClientAccessService {
     async login(
         slug: string,
-        password: string
+        password: string,
+        credentialId: string
     ) {
         const fingerprint =
             getClientDeviceId();
@@ -25,30 +25,30 @@ class ClientAccessService {
                 {
                     password,
                     fingerprint,
+                    credentialId,
                 }
             );
 
-        setClientSession(
-            response.data.sessionToken,
-            response.data.expiresAt
-        );
-
         return response.data;
     }
 
-    async getPortfolio(
-        slug: string
-    ) {
+    async getPortfolio(slug: string) {
         const response =
             await api.get<ClientPortfolioResponse>(
-                `/portfolio/${slug}`
+                `/portfolio/${slug}/full`
             );
 
         return response.data;
     }
 
-    logout() {
-        clearClientSession();
+    async logout() {
+        try {
+            await api.post(
+                "/client-access/me/logout"
+            );
+        } finally {
+            clearClientSession();
+        }
     }
 }
 

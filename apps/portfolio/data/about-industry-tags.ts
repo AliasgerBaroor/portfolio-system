@@ -1,11 +1,11 @@
 import { IndustryTag } from "@workspace/ui/components/industry-tag";
 
 export const industryTags: IndustryTag[] = [
-    { id: "culture", name: "Culture" },
-    { id: "e-commerce", name: "E-commerce" },
-    { id: "agency-studio", name: "Agency/Studio" },
-    { id: "artificial-intelligence", name: "Artificial Intelligence" },
-    { id: "fashion", name: "Fashion" },
-    { id: "aviation", name: "Aviation" },
-    { id: "entertainment", name: "Entertainment" },
+    { label: "culture", name: "Culture" },
+    { label: "e-commerce", name: "E-commerce" },
+    { label: "agency-studio", name: "Agency/Studio" },
+    { label: "artificial-intelligence", name: "Artificial Intelligence" },
+    { label: "fashion", name: "Fashion" },
+    { label: "aviation", name: "Aviation" },
+    { label: "entertainment", name: "Entertainment" },
 ];

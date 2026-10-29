@@ -1,6 +1,8 @@
+
 "use client";
 
-import React from "react";
+import "./gallery.css";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import type { GalleryItem } from "./gallery.types";
@@ -12,43 +14,84 @@ interface Props {
     onClick: () => void;
 }
 
-function GalleryItem({
-    data,
-    onClick,
-}: Props) {
+function GalleryItemComponent({ data, onClick }: Props) {
+    const mediaRef = useRef<HTMLDivElement>(null);
+    const [nearViewport, setNearViewport] = useState(false);
+
+    const uniqueItemId = data.id.replace(
+        /__(?:horizontal|vertical)_-?\d+|__repeat_\d+/g,
+        ""
+    );
+
     const revealed = useGalleryRevealStore(
-        (state) => state.revealed.has(data.id)
+        (state) => state.revealed.has(uniqueItemId)
     );
 
     const reveal = useGalleryRevealStore(
         (state) => state.reveal
     );
 
+    useEffect(() => {
+        const element = mediaRef.current;
+        if (!element) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (!entry) return;
+
+                if (entry.isIntersecting) {
+                    setNearViewport(true);
+                    observer.disconnect();
+                }
+            },
+            {
+                rootMargin: "300px",
+                threshold: 0,
+            }
+        );
+
+        observer.observe(element);
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
-        <Frame strength="low" radius="md">
+        <Frame
+            strength="low"
+            radius="md"
+            className="gallery-frame"
+        >
             <div
+                ref={mediaRef}
                 className="gallery-item cursor-pointer"
                 style={{
                     aspectRatio: `${data.media.width} / ${data.media.height}`,
                 }}
-                onMouseEnter={() => reveal(data.id)}
+                onMouseEnter={() => reveal(uniqueItemId)}
                 onClick={onClick}
             >
                 {data.media.type === "image" ? (
-                    <Image
-                        src={data.media.src}
-                        alt={data.media.alt ?? ""}
-                        width={data.media.width}
-                        height={data.media.height}
-                        loading="eager"
-                        decoding="async"
-                        sizes="(max-width: 768px) 100vw, 320px"
-                        className="gallery-media"
-                        data-revealed={revealed}
-                    />
+                    nearViewport ? (
+                        <Image
+                            src={data.media.src}
+                            alt={data.media.alt ?? ""}
+                            width={data.media.width}
+                            height={data.media.height}
+                            loading="lazy"
+                            decoding="async"
+                            sizes="320px"
+                            className="gallery-media"
+                            data-revealed={revealed}
+                        />
+                    ) : (
+                        <div
+                            className="gallery-media"
+                            aria-hidden="true"
+                        />
+                    )
                 ) : (
                     <video
-                        autoPlay
+                        autoPlay={nearViewport}
                         muted
                         loop
                         playsInline
@@ -57,7 +100,9 @@ function GalleryItem({
                         className="gallery-media"
                         data-revealed={revealed}
                     >
-                        <source src={data.media.src} />
+                        {nearViewport && (
+                            <source src={data.media.src} />
+                        )}
                     </video>
                 )}
             </div>
@@ -65,4 +110,4 @@ function GalleryItem({
     );
 }
 
-export default React.memo(GalleryItem);
+export default React.memo(GalleryItemComponent);

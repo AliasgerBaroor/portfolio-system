@@ -16,9 +16,12 @@ export default function Navigation({
     } = useNavigationStore();
 
     return (
-        <>
-            <Frame strength="low">
-                <nav className="floating-navigation-menu">
+        <div className="floating-navigation-content">
+            <Frame
+                strength="low"
+                className="floating-navigation-category-frame"
+            >
+                <nav className="floating-navigation-menu floating-navigation-categories">
                     {items.category.map((item) => (
                         <NavigationItem
                             key={item.id}
@@ -30,18 +33,23 @@ export default function Navigation({
                 </nav>
             </Frame>
 
-            <Frame strength="low">
-                <nav className="floating-navigation-menu">
+            <Frame
+                strength="low"
+                className="floating-navigation-action-frame"
+            >
+                <nav className={"floating-navigation-menu floating-navigation-actions"}>
                     {items.actions.map((item) => (
                         <NavigationItem
                             key={item.id}
                             item={item}
                             active={item.id === action}
                             onClick={() => setAction(item.id)}
+                            mobileLabel
+                            disabled
                         />
                     ))}
                 </nav>
             </Frame>
-        </>
+        </div>
     );
 }

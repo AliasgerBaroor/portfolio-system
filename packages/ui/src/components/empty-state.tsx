@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@workspace/ui/lib/utils";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 
 interface EmptyStateProps
     extends React.HTMLAttributes<HTMLDivElement> {

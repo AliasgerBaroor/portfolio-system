@@ -1,6 +1,6 @@
 import { Card } from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
-import { Typography } from "@workspace/ui/components/typography";
+import { Typography } from "@workspace/ui/components/typography/typography";
 import { usePortfolio } from "@/contexts/portfolio-context";
 import { useEffect, useState } from "react";
 

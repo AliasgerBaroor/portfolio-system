@@ -12,4 +12,10 @@ export const LoginClientAccessSchema =
             .trim()
             .min(1)
             .max(255),
+
+        credentialId: z
+            .string()
+            .trim()
+            .min(1)
+            .max(100),
     });

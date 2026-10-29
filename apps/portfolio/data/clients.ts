@@ -1,53 +1,210 @@
-import { AffinityLogo } from "@/icons/temporary";
-import { CyanergyLogo } from "@/icons/temporary/cyanergy";
-import { SquadCastLogo } from "@/icons/temporary/squadcast";
-import { TinkerVillageLogo } from "@/icons/temporary/tinker-village";
-import { UserExperiorLogo } from "@/icons/temporary/user-experiror";
-import { VoltLogo } from "@/icons/temporary/volt";
 
-export const clients = [
+import type { Client } from "@/components/clients/clients.types";
+import { getStoragePublicUrl } from "@/lib/supabase/storage";
+
+export const clients: Client[] = [
     {
-        name: "Affinity",
-        logo: AffinityLogo,
+        id: "logifex-studio",
+        name: "Logifex Studio",
+        logo: getStoragePublicUrl("client-logos/client-logos/Logifex.svg"),
+        category: "agency",
     },
     {
+        id: "cue-math",
+        name: "Cue Math",
+        logo: getStoragePublicUrl("client-logos/Cuemath.svg"),
+        category: "culture",
+    },
+    {
+        id: "mpl",
+        name: "MPL",
+        logo: getStoragePublicUrl("client-logos/MPL.svg"),
+        category: "entertainment",
+    },
+    {
+        id: "liama-index",
+        name: "Liama Index",
+        logo: getStoragePublicUrl("client-logos/Liamaindex.svg"),
+        category: "ai",
+    },
+    {
+        id: "get-my-parking",
+        name: "Get My Parking",
+        logo: getStoragePublicUrl("client-logos/GMP.svg"),
+        category: "saas",
+    },
+    {
+        id: "fuel-cycle",
+        name: "Fuel Cycle",
+        logo: getStoragePublicUrl("client-logos/FuelCycle.svg"),
+        category: "aviation",
+    },
+    {
+        id: "ayla-network",
+        name: "Ayla Network",
+        logo: getStoragePublicUrl("client-logos/AylaNetwork.svg"),
+        category: "saas",
+    },
+    {
+        id: "truss",
+        name: "Truss",
+        logo: getStoragePublicUrl("client-logos/Truss.svg"),
+        category: "fashion",
+    },
+    {
+        id: "portless",
+        name: "Portless",
+        logo: getStoragePublicUrl("client-logos/Portless.svg"),
+        category: "software",
+    },
+    {
+        id: "user-experior",
+        name: "User Experior",
+        logo: getStoragePublicUrl("client-logos/UserExperiror.svg"),
+        category: "ai",
+    },
+    {
+        id: "regeneron",
+        name: "Regeneron",
+        logo: getStoragePublicUrl("client-logos/Regeneron.svg"),
+        category: "agency",
+    },
+    {
+        id: "rayhawk",
+        name: "Rayhawk",
+        logo: getStoragePublicUrl("client-logos/Rayhawk.svg"),
+        category: "agency",
+    },
+    {
+        id: "scalix-ai",
+        name: "Scalix Ai",
+        logo: getStoragePublicUrl("client-logos/Scalix.svg"),
+        category: "ai",
+    },
+    {
+        id: "jooba",
+        name: "Jooba",
+        logo: getStoragePublicUrl("client-logos/Jooba.svg"),
+        category: "ecommerce",
+    },
+    {
+        id: "thirty-sundays",
+        name: "30 Sundays",
+        logo: getStoragePublicUrl("client-logos/30Sundays.svg"),
+        category: "culture",
+    },
+    {
+        id: "drizz",
+        name: "Drizz",
+        logo: getStoragePublicUrl("client-logos/Drizz.svg"),
+        category: "agency",
+    },
+    {
+        id: "volt",
         name: "Volt",
-        logo: VoltLogo,
+        logo: getStoragePublicUrl("client-logos/Volt.svg"),
+        category: "finance",
     },
     {
-        name: "Squadcast",
-        logo: SquadCastLogo,
+        id: "get-set-yo",
+        name: "Get Set Yo",
+        logo: getStoragePublicUrl("client-logos/getsetyo.svg"),
+        category: "software",
     },
     {
-        name: "UserExperior",
-        logo: UserExperiorLogo,
+        id: "propertel-legent",
+        name: "Propertellegent",
+        logo: getStoragePublicUrl("client-logos/Propertiiligent.svg"),
+        category: "software",
     },
     {
-        name: "Cyanergy",
-        logo: CyanergyLogo,
+        id: "qa-pilot",
+        name: "Qa Pilot",
+        logo: getStoragePublicUrl("client-logos/QApilot.svg"),
+        category: "ai",
     },
     {
-        name: "Tinker Village",
-        logo: TinkerVillageLogo,
+        id: "gasoline-pilot",
+        name: "Gasoline Pilot",
+        logo: getStoragePublicUrl("client-logos/Gasoline.svg"),
+        category: "agency",
     },
     {
-        name: "Volt",
-        logo: VoltLogo,
+        id: "hexa-climate",
+        name: "Hexa-climate",
+        logo: getStoragePublicUrl("client-logos/Hexaclimate.svg"),
+        category: "ai",
     },
     {
-        name: "Squadcast",
-        logo: SquadCastLogo,
+        id: "oddiville",
+        name: "Oddiville",
+        logo: getStoragePublicUrl("client-logos/Oddiville.svg"),
+        category: "software",
     },
     {
-        name: "UserExperior",
-        logo: UserExperiorLogo,
+        id: "fresh-4-u",
+        name: "Fresh 4 U",
+        logo: getStoragePublicUrl("client-logos/Fresh4u.svg"),
+        category: "ecommerce",
     },
     {
-        name: "Cyanergy",
-        logo: CyanergyLogo,
+        id: "ain-watches",
+        name: "Ain Watches",
+        logo: getStoragePublicUrl("client-logos/AINWatches.svg"),
+        category: "ecommerce",
     },
     {
-        name: "Tinker Village",
-        logo: TinkerVillageLogo,
+        id: "construct-accountants",
+        name: "Construct Accountants",
+        logo: getStoragePublicUrl("client-logos/Construct.svg"),
+        category: "agency",
+    },
+    {
+        id: "zabihat",
+        name: "Zabihat",
+        logo: getStoragePublicUrl("client-logos/Zabhihat.svg"),
+        category: "software",
+    },
+    {
+        id: "misk",
+        name: "Misk",
+        logo: getStoragePublicUrl("client-logos/Misk.svg"),
+        category: "ecommerce",
+    },
+    {
+        id: "idld",
+        name: "Idld",
+        logo: getStoragePublicUrl("client-logos/IDLD.svg"),
+        category: "agency",
+    },
+    {
+        id: "aljamea",
+        name: "Aljamea Tus Saifeyah",
+        logo: getStoragePublicUrl("client-logos/Aljamea-tus-saifeyah.svg"),
+        category: "culture",
+    },
+    {
+        id: "the-dawoodi-bohra",
+        name: "The Dawoodi Bohra",
+        logo: getStoragePublicUrl("client-logos/The-Dawoodi.svg"),
+        category: "culture",
+    },
+    {
+        id: "faiz-e-hakimi",
+        name: "Faiz E Hakimi",
+        logo: getStoragePublicUrl("client-logos/Faiz.svg"),
+        category: "culture",
+    },
+    {
+        id: "dallas-fmb",
+        name: "Dallas FMB",
+        logo: getStoragePublicUrl("client-logos/Dallas-FMB.svg"),
+        category: "culture",
+    },
+    {
+        id: "london-ashara",
+        name: "London Ashara",
+        logo: getStoragePublicUrl("client-logos/London-Ashara.svg"),
+        category: "culture",
     },
 ];

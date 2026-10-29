@@ -17,6 +17,7 @@ import {
 
 import type { User } from "@/types/auth";
 import axios from "axios";
+import { refreshAccessToken } from "@/lib/refresh-session";
 
 type AuthContextType = {
     user: User | null;
@@ -37,6 +38,8 @@ type AuthContextType = {
 
 const AuthContext =
     createContext<AuthContextType | null>(null);
+
+let restoreSessionPromise: Promise<void> | null = null;
 
 export function AuthProvider({
     children,
@@ -91,19 +94,33 @@ export function AuthProvider({
     }
 
     async function restoreSession() {
+        if (restoreSessionPromise) {
+            return restoreSessionPromise;
+        }
+
+        restoreSessionPromise = (async () => {
+            try {
+                await refreshAccessToken();
+
+                const me = await authService.me();
+                setUser(me.user);
+            } catch (error) {
+                console.error(
+                    "[Auth] Session restoration failed:",
+                    error
+                );
+
+                clearAccessToken();
+                setUser(null);
+            } finally {
+                setInitializing(false);
+            }
+        })();
+
         try {
-            const refresh = await authService.refresh();
-
-            setAccessToken(refresh.accessToken);
-
-            const me = await authService.me();
-
-            setUser(me.user);
-        } catch {
-            clearAccessToken();
-            setUser(null);
+            await restoreSessionPromise;
         } finally {
-            setInitializing(false);
+            restoreSessionPromise = null;
         }
     }
 

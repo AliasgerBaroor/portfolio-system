@@ -5,6 +5,7 @@ import get from "./get";
 import login from "./login/login";
 import me from "./me";
 import remove from "./delete";
+import logout from "./logout";
 
 const clientAccessKey = new Hono();
 
@@ -13,5 +14,6 @@ clientAccessKey.route("/", get);
 clientAccessKey.route("/:slug/access", login);
 clientAccessKey.route("/me", me);
 clientAccessKey.route("/", remove);
+clientAccessKey.route("/me/logout", logout);
 
 export default clientAccessKey;

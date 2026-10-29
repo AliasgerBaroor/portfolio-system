@@ -27,11 +27,13 @@ export type NavigationProps = {
     items: NavigationGroup;
 };
 
-export type NavigationItemProps = {
+export interface NavigationItemProps {
     item: NavigationItem;
-    active?: boolean;
-    onClick?: () => void;
-};
+    active: boolean;
+    onClick: () => void;
+    mobileLabel?: boolean;
+    disabled?: boolean;
+}
 
 export type ActionsProps = {
     items: ActionItem[];

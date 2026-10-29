@@ -7,7 +7,7 @@ import { getClientPortfolio } from "../../services/portfolio/client-portfolio.se
 const clientGet = new Hono();
 
 clientGet.get(
-    "/:slug",
+    "/:slug/full",
     clientAccessMiddleware,
     async (c) => {
         try {
@@ -24,6 +24,17 @@ clientGet.get(
                 );
             }
 
+            /*
+             * clientAccessMiddleware has already:
+             *
+             * cookie
+             *    ↓
+             * session token hash
+             *    ↓
+             * ClientAccessSession
+             *    ↓
+             * ClientAccessKey
+             */
             const session =
                 c.get("clientAccessSession");
 
@@ -35,7 +46,16 @@ clientGet.get(
 
             return c.json({
                 success: true,
+
                 portfolio,
+
+                session: {
+                    expiresAt:
+                        session.expiresAt,
+
+                    credentialId:
+                        session.accessKey.credentialId,
+                },
             });
         } catch (error) {
             return c.json(

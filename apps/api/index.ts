@@ -16,6 +16,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "https://portfolio-system-55xb.vercel.app",
+      "https://portfolio-system-caxn.vercel.app"
     ],
     credentials: true,
   })

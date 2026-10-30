@@ -157,6 +157,22 @@ async function createGalleryItems(
     };
 }
 
+
+function shuffleSources(sources: GallerySource[]): GallerySource[] {
+    const shuffled = [...sources];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [shuffled[i], shuffled[j]] = [
+            shuffled[j]!,
+            shuffled[i]!,
+        ];
+    }
+
+    return shuffled;
+}
+
 export default function Gallery({
     items,
 }: {
@@ -234,6 +250,12 @@ export default function Gallery({
         );
     }, [items, category]);
 
+
+    const randomizedItems = useMemo(
+        () => shuffleSources(filteredItems),
+        [filteredItems]
+    );
+
     useEffect(() => {
         let cancelled = false;
 
@@ -251,9 +273,9 @@ export default function Gallery({
         setIsMoreInfoOpen(false);
 
         async function loadInitialBatch() {
-            if (filteredItems.length === 0) return;
+            if (randomizedItems.length === 0) return;
 
-            const batch = filteredItems.slice(
+            const batch = randomizedItems.slice(
                 0,
                 INITIAL_BATCH_SIZE
             );
@@ -277,10 +299,10 @@ export default function Gallery({
         return () => {
             cancelled = true;
         };
-    }, [filteredItems]);
+    }, [randomizedItems]);
 
     const loadNextBatch = useCallback(async () => {
-        const totalSources = filteredItems.length;
+        const totalSources = randomizedItems.length;
 
         if (totalSources === 0 || loadingRef.current) {
             return;
@@ -303,7 +325,7 @@ export default function Gallery({
                 totalSources - sourceIndex
             );
 
-            const batch = filteredItems.slice(
+            const batch = randomizedItems.slice(
                 sourceIndex,
                 sourceIndex + count
             );
@@ -332,7 +354,7 @@ export default function Gallery({
         } finally {
             loadingRef.current = false;
         }
-    }, [filteredItems]);
+    }, [randomizedItems]);
 
     const handleMoreInfoOpen = (item: GalleryItem | null) => {
         if (!item) return;

@@ -29,4 +29,9 @@ export const env = {
 
     REFRESH_TOKEN_EXPIRES_RAW:
         process.env.REFRESH_TOKEN_EXPIRES_IN ?? "30d",
+
+    SUPABASE_URL: required("SUPABASE_URL"),
+    SUPABASE_SECRET_KEY: required("SUPABASE_SECRET_KEY"),
+    SUPABASE_STORAGE_BUCKET: required("SUPABASE_STORAGE_BUCKET"),
+    ASSET_STORAGE_PROVIDER: process.env.ASSET_STORAGE_PROVIDER ?? "supabase",
 };

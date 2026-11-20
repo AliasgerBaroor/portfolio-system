@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authMiddleware } from "../../../../middleware/auth";
+import { authMiddleware } from "../../../../middleware/auth.middleware";
 import { reorderPortfolioContentBlocks } from "../../../../services/portfolio/content-blocks.service";
 
 const reorder = new Hono();

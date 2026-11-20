@@ -32,14 +32,6 @@ login.post("/", async (c) => {
 
         setRefreshCookie(c, auth.refreshToken);
 
-        // setCookie(c, "refresh_token", auth.refreshToken, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === "production",
-        //     sameSite: "Lax",
-        //     path: "/",
-        //     maxAge: 60 * 60 * 24 * 30,
-        // });
-
         console.log("auth.accessToken", auth.accessToken);
         
         return c.json({

@@ -7,6 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================
+// WORKSPACE & APPLICATION FOUNDATION
+// ============================================================
+
+enum WorkspaceStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum ApplicationType {
+  WEBSITE
+  PORTFOLIO
+  WEB_APP
+  MOBILE_APP
+  INTERNAL_TOOL
+  OTHER
+}
+
+enum ApplicationIntegrationMode {
+  MANAGED
+  EXTERNAL
+}
+
+enum ApplicationStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum EnvironmentType {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+  CUSTOM
+}
+
+enum EnvironmentStatus {
+  ACTIVE
+  DISABLED
+  ARCHIVED
+}
+
 enum UserRole {
   ADMIN
   USER
@@ -315,14 +371,13 @@ model Portfolio {
   seoDescription String?
 
   // ============================================================
-// NEW CMS
-// ============================================================
-
-cmsCollections CmsCollection[]
+  // NEW CMS
   // ============================================================
-// CLOSE NEW CMS
-// ============================================================
 
+  cmsCollections CmsCollection[]
+  // ============================================================
+  // CLOSE NEW CMS
+  // ============================================================
 
   @@index([ownerId])
   @@index([slug])
@@ -431,37 +486,6 @@ model ProjectPortfolioCategory {
   @@index([categoryId])
 }
 
-model User {
-  id String @id @default(cuid())
-
-  email        String @unique
-  passwordHash String
-
-  username    String  @unique
-  fullName    String
-  displayName String
-  avatar      String?
-
-  bio String?
-
-  isActive Boolean @default(true)
-
-  role UserRole @default(ADMIN)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  portfolios Portfolio[]
-  sessions   Session[]
-  clients    Client[]
-  accessKeys ClientAccessKey[]
-
-  lastLoginAt DateTime?
-
-  @@index([username])
-}
-
 model ClientAccessLog {
   id String @id @default(cuid())
 
@@ -514,9 +538,6 @@ model ProjectTagAssignment {
   @@index([tagId])
 }
 
-
-
-
 // ============================================================
 // NEW CMS — CURRENT
 // ============================================================
@@ -537,41 +558,40 @@ model ProjectTagAssignment {
 // ============================================================
 
 model CmsCollection {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    portfolioId String
-    portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
-    name String
-    slug String
-    description String?
+  name        String
+  slug        String
+  description String?
 
-    // System collections are created automatically by the platform
-    // and cannot be deleted through normal CMS operations.
-    isSystem Boolean @default(false)
+  // System collections are created automatically by the platform
+  // and cannot be deleted through normal CMS operations.
+  isSystem Boolean @default(false)
 
-    isEnabled Boolean @default(true)
-    sortOrder Int @default(0)
+  isEnabled Boolean @default(true)
+  sortOrder Int     @default(0)
 
-    items CmsItem[]
+  items CmsItem[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@unique([portfolioId, slug])
-    @@index([portfolioId])
-    @@index([portfolioId, sortOrder])
+  @@unique([portfolioId, slug])
+  @@index([portfolioId])
+  @@index([portfolioId, sortOrder])
 }
-
 
 model CmsItem {
   id String @id @default(cuid())
 
   collectionId String
-  collection CmsCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collection   CmsCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
   title String
-  slug String
+  slug  String
 
   description String?
 
@@ -579,14 +599,14 @@ model CmsItem {
   data Json?
 
   isPublished Boolean @default(false)
-  isVisible Boolean @default(true)
+  isVisible   Boolean @default(true)
 
   sortOrder Int @default(0)
 
   sections CmsSection[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@unique([collectionId, slug])
@@ -595,15 +615,14 @@ model CmsItem {
   @@index([collectionId, isPublished])
 }
 
-
 model CmsSection {
   id String @id @default(cuid())
 
   itemId String
-  item CmsItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  item   CmsItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   title String
-  slug String
+  slug  String
 
   // Flexible instead of the OLD fixed SectionType enum.
   type String?
@@ -611,7 +630,7 @@ model CmsSection {
   sortOrder Int @default(0)
 
   isVisible Boolean @default(true)
-  isSystem Boolean @default(false)
+  isSystem  Boolean @default(false)
 
   blocks CmsBlock[]
 
@@ -623,12 +642,11 @@ model CmsSection {
   @@index([itemId, sortOrder])
 }
 
-
 model CmsBlock {
   id String @id @default(cuid())
 
   sectionId String
-  section CmsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  section   CmsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
   // Examples:
   // text
@@ -654,4 +672,729 @@ model CmsBlock {
 
   @@index([sectionId])
   @@index([sectionId, sortOrder])
+}
+
+// ============================================================
+// ADD THESE RELATION FIELDS TO YOUR EXISTING User MODEL
+// ============================================================
+
+model User {
+  id String @id @default(cuid())
+
+  email        String @unique
+  passwordHash String
+
+  username    String  @unique
+  fullName    String
+  displayName String
+  avatar      String?
+
+  bio String?
+
+  isActive Boolean @default(true)
+
+  role UserRole @default(ADMIN)
+
+  createdAssets Asset[] @relation("AssetUserCreator")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  portfolios      Portfolio[]
+  sessions        Session[]
+  clients         Client[]
+  accessKeys      ClientAccessKey[]
+  ownedWorkspaces Workspace[]       @relation("WorkspaceOwner")
+
+  workspaceMemberships          WorkspaceMember[]         @relation("WorkspaceMemberUser")
+  createdWorkspaces             Workspace[]               @relation("WorkspaceCreator")
+  sentWorkspaceInvitations      WorkspaceInvitation[]     @relation("InvitationInviter")
+  createdApplications           Application[]             @relation("ApplicationCreator")
+  createdApplicationCredentials ApplicationCredential[]   @relation("CredentialCreator")
+  createdContentEntries         ContentEntry[]            @relation("ContentEntryCreator")
+  updatedContentEntries         ContentEntry[]            @relation("ContentEntryUpdater")
+  createdContentVersions        ContentVersion[]          @relation("ContentVersionCreator")
+  createdContentModelVersions   ContentModelVersion[]
+  contentEntryAccessGrants      ContentEntryAccessGrant[]
+
+  lastLoginAt DateTime?
+
+  @@index([username])
+}
+
+// ============================================================
+// WORKSPACE
+// ============================================================
+
+model Workspace {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String?
+  status      WorkspaceStatus @default(ACTIVE)
+
+  createdById String?
+  createdBy   User?   @relation("WorkspaceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  ownerId String
+  owner   User   @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  members      WorkspaceMember[]
+  roles        WorkspaceRole[]
+  invitations  WorkspaceInvitation[]
+  applications Application[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+  @@index([createdById])
+}
+
+// ============================================================
+// WORKSPACE ROLES
+// ============================================================
+
+model WorkspaceRole {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name        String
+  key         String
+  description String?
+
+  // Permission definitions, evaluated centrally by the API.
+  // Example: ["workspace.read", "content.read", "content.create"]
+  permissions Json
+
+  isSystem Boolean @default(false)
+
+  members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, key])
+  @@unique([workspaceId, id])
+  @@index([workspaceId])
+}
+
+// ============================================================
+// WORKSPACE MEMBERS
+// ============================================================
+
+model WorkspaceMember {
+  id String @id @default(cuid())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("WorkspaceMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  roleId String
+  role   WorkspaceRole @relation(fields: [workspaceId, roleId], references: [workspaceId, id], onDelete: Restrict)
+
+  status MembershipStatus @default(ACTIVE)
+
+  joinedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId, status])
+  @@index([roleId])
+}
+
+// ============================================================
+// WORKSPACE INVITATIONS
+// ============================================================
+
+model WorkspaceInvitation {
+  id String @id @default(cuid())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  email String
+
+  roleId String
+  role   WorkspaceRole @relation(fields: [workspaceId, roleId], references: [workspaceId, id], onDelete: Restrict)
+
+  invitedById String?
+  invitedBy   User?   @relation("InvitationInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  tokenHash String @unique
+
+  status InvitationStatus @default(PENDING)
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  revokedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId, email])
+  @@index([workspaceId, status])
+  @@index([expiresAt])
+}
+
+// ============================================================
+// APPLICATIONS
+// ============================================================
+
+model Application {
+  id String @id @default(cuid())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+
+  type            ApplicationType
+  integrationMode ApplicationIntegrationMode @default(MANAGED)
+  status          ApplicationStatus          @default(ACTIVE)
+
+  contentModels ContentModel[]
+
+  createdById String?
+  createdBy   User?   @relation("ApplicationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  environments ApplicationEnvironment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status])
+  @@index([workspaceId, type])
+}
+
+// ============================================================
+// APPLICATION ENVIRONMENTS
+// ============================================================
+
+model ApplicationEnvironment {
+  id            String @id @default(cuid())
+  applicationId String
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  type        EnvironmentType
+  description String?
+
+  status EnvironmentStatus @default(ACTIVE)
+
+  credentials    ApplicationCredential[]
+  contentEntries ContentEntry[]
+  assets         Asset[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([applicationId, slug])
+  @@index([applicationId, type])
+  @@index([applicationId, status])
+}
+
+// ============================================================
+// APPLICATION API CREDENTIALS
+// ============================================================
+
+model ApplicationCredential {
+  id String @id @default(cuid())
+
+  description String?
+
+  environmentId String
+  environment   ApplicationEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  name       String
+  keyPrefix  String
+  secretHash String @unique
+
+  // Example scopes:
+  // ["content.read", "content.write", "assets.read"]
+  scopes Json
+
+  createdById String?
+  createdBy   User?   @relation("CredentialCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAssets Asset[] @relation("AssetCredentialCreator")
+
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([environmentId])
+  @@index([keyPrefix])
+  @@index([expiresAt])
+  @@index([environmentId, revokedAt])
+}
+
+// ============================================================
+// CONTENT ENGINE ENUMS
+// ============================================================
+
+enum ContentModelStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ContentFieldType {
+  TEXT
+  RICH_TEXT
+  MARKDOWN
+  NUMBER
+  BOOLEAN
+  DATE
+  DATETIME
+  EMAIL
+  URL
+  PHONE
+  ENUM
+  JSON
+  OBJECT
+  ARRAY
+  IMAGE
+  FILE
+  RELATION
+}
+
+enum ContentEntryStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum ContentVisibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+enum ContentAccessMethod {
+  OPEN
+  PASSWORD
+  APPROVED_ACCESS
+}
+
+enum ContentRelationType {
+  ONE_TO_ONE
+  ONE_TO_MANY
+  MANY_TO_ONE
+  MANY_TO_MANY
+}
+
+enum AssetStatus {
+  UPLOADING
+  READY
+  DELETING
+  FAILED
+  DELETED
+}
+
+// ============================================================
+// CONTENT MODELS
+// ============================================================
+
+model ContentModelVersion {
+  id String @id @default(cuid())
+
+  modelId String
+  model   ContentModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  version Int
+
+  // Snapshot of all field definitions and their configurations.
+  schema Json
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  changeSummary String?
+
+  contentVersions ContentVersion[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([modelId, version])
+  @@unique([modelId, id])
+  @@index([modelId, createdAt])
+}
+
+model ContentModel {
+  id String @id @default(cuid())
+
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+
+  status       ContentModelStatus        @default(DRAFT)
+  uniqueValues ContentEntryUniqueValue[]
+
+  // Increment when the content structure changes.
+  schemaVersion Int                   @default(1)
+  versions      ContentModelVersion[]
+
+  isSystem Boolean @default(false)
+
+  fields  ContentField[]
+  entries ContentEntry[]
+
+  sourceRelations ContentRelationDefinition[] @relation("ContentRelationSource")
+  targetRelations ContentRelationDefinition[] @relation("ContentRelationTarget")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([applicationId, slug])
+  @@unique([applicationId, id])
+  @@index([applicationId, status])
+}
+
+// ============================================================
+// CONTENT FIELDS
+// ============================================================
+
+model ContentField {
+  id String @id @default(cuid())
+
+  modelId String
+  model   ContentModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  // Supports nested OBJECT and ARRAY fields.
+  parentId     String?
+  parent       ContentField?             @relation("ContentFieldHierarchy", fields: [modelId, parentId], references: [modelId, id], onDelete: Cascade)
+  children     ContentField[]            @relation("ContentFieldHierarchy")
+  uniqueValues ContentEntryUniqueValue[]
+
+  name        String
+  key         String
+  description String?
+
+  type ContentFieldType
+
+  // Field configuration
+  isRequired Boolean @default(false)
+  isUnique   Boolean @default(false)
+  isArray    Boolean @default(false)
+
+  defaultValue Json?
+  validation   Json?
+  options      Json?
+  uiConfig     Json?
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([modelId, id])
+  @@index([modelId, parentId])
+  @@index([modelId, sortOrder])
+}
+
+// ============================================================
+// CONTENT ENTRIES
+// ============================================================
+
+model ContentEntry {
+  id String @id @default(cuid())
+
+  modelId String
+  model   ContentModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  environmentId String
+  environment   ApplicationEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  // Optional identifier supplied by an external application.
+  externalId String?
+
+  // Optional human-readable URL identifier.
+  slug String?
+
+  status             ContentEntryStatus        @default(DRAFT)
+  archivedFromStatus ContentEntryStatus?
+  uniqueValues       ContentEntryUniqueValue[]
+
+  // Entry-level discovery and access policy.
+  visibility   ContentVisibility   @default(PRIVATE)
+  accessMethod ContentAccessMethod @default(OPEN)
+  passwordHash String?
+
+  publishedAt DateTime?
+
+  // Pointers to versions belonging to this same entry.
+  currentDraftVersionId String?
+  publishedVersionId    String?
+
+  currentDraftVersion ContentVersion? @relation("CurrentDraftContentVersion", fields: [id, currentDraftVersionId], references: [entryId, id], onDelete: Restrict)
+
+  publishedVersion ContentVersion? @relation("PublishedContentVersion", fields: [id, publishedVersionId], references: [entryId, id], onDelete: Restrict)
+
+  // All historical versions.
+  versions ContentVersion[]
+
+  // Content relationships.
+  outgoingRelations ContentEntryRelation[] @relation("ContentRelationSourceEntry")
+  incomingRelations ContentEntryRelation[] @relation("ContentRelationTargetEntry")
+
+  // Entry access grants.
+  accessGrants ContentEntryAccessGrant[]
+
+  // Creator and updater.
+  createdById String?
+  createdBy   User?   @relation("ContentEntryCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  updatedById String?
+  updatedBy   User?   @relation("ContentEntryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  // Timestamps and soft deletion.
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([environmentId, modelId, externalId])
+  @@unique([environmentId, modelId, slug])
+  // Required by ContentVersion's composite relation
+  @@unique([modelId, id])
+  // Required by environment-scoped relations
+  @@unique([environmentId, modelId, id])
+  @@unique([id, currentDraftVersionId])
+  @@unique([id, publishedVersionId])
+  @@index([environmentId, modelId, status])
+  @@index([environmentId, modelId, updatedAt])
+  @@index([environmentId, modelId, visibility, status])
+}
+
+// ============================================================
+// CONTENT VERSIONS
+// ============================================================
+
+model ContentVersion {
+  id String @id @default(cuid())
+
+  entryId String
+  entry   ContentEntry @relation(fields: [modelId, entryId], references: [modelId, id], onDelete: Cascade)
+
+  currentDraftFor ContentEntry? @relation("CurrentDraftContentVersion")
+  publishedFor    ContentEntry? @relation("PublishedContentVersion")
+
+  version       Int
+  schemaVersion Int
+
+  // The content source of truth.
+  snapshot Json
+
+  status ContentVersionStatus
+
+  changeSummary String?
+
+  createdById String?
+  createdBy   User?   @relation("ContentVersionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  modelId String
+
+  modelSchemaVersion ContentModelVersion @relation(fields: [modelId, schemaVersion], references: [modelId, version], onDelete: Restrict)
+
+  @@unique([entryId, version])
+  @@unique([entryId, id])
+  @@index([entryId, createdAt])
+  @@index([entryId, status])
+}
+
+// ============================================================
+// CONTENT RELATION DEFINITIONS
+// ============================================================
+
+model ContentRelationDefinition {
+  id String @id @default(cuid())
+
+  applicationId String
+
+  sourceModelId String
+  sourceModel   ContentModel @relation("ContentRelationSource", fields: [applicationId, sourceModelId], references: [applicationId, id], onDelete: Cascade)
+
+  targetModelId String
+  targetModel   ContentModel @relation("ContentRelationTarget", fields: [applicationId, targetModelId], references: [applicationId, id], onDelete: Cascade)
+
+  name String
+  key  String
+
+  type ContentRelationType
+
+  description String?
+
+  // Whether the relationship must exist.
+  isRequired Boolean @default(false)
+
+  // Whether this relationship can be edited from the target side.
+  isBidirectional Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entries ContentEntryRelation[]
+
+  @@unique([applicationId, key])
+  @@unique([applicationId, id])
+  @@unique([applicationId, id, sourceModelId, targetModelId])
+  @@index([applicationId])
+  @@index([sourceModelId])
+  @@index([targetModelId])
+}
+
+// ============================================================
+// CONTENT ENTRY RELATIONS
+// ============================================================
+
+model ContentEntryRelation {
+  id String @id @default(cuid())
+
+  applicationId String
+  sourceModelId String
+  targetModelId String
+  environmentId String
+
+  definitionId String
+  definition   ContentRelationDefinition @relation(fields: [applicationId, definitionId, sourceModelId, targetModelId], references: [applicationId, id, sourceModelId, targetModelId], onDelete: Cascade)
+
+  sourceEntryId String
+  sourceEntry   ContentEntry @relation("ContentRelationSourceEntry", fields: [environmentId, sourceModelId, sourceEntryId], references: [environmentId, modelId, id], onDelete: Cascade)
+
+  targetEntryId String
+  targetEntry   ContentEntry @relation("ContentRelationTargetEntry", fields: [environmentId, targetModelId, targetEntryId], references: [environmentId, modelId, id], onDelete: Cascade)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([definitionId, sourceEntryId, targetEntryId])
+  @@index([sourceEntryId])
+  @@index([targetEntryId])
+  @@index([environmentId, sourceEntryId])
+  @@index([environmentId, targetEntryId])
+  @@index([definitionId, sourceEntryId])
+}
+
+model ContentEntryAccessGrant {
+  id String @id @default(cuid())
+
+  entryId String
+  entry   ContentEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // For invited or approved email-based access.
+  email String?
+
+  approvedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([entryId, userId])
+  @@index([entryId, email])
+  @@index([entryId, revokedAt])
+}
+
+model ContentEntryUniqueValue {
+  id String @id @default(cuid())
+
+  environmentId String
+  modelId       String
+  fieldId       String
+  entryId       String
+
+  value     Json
+  valueHash String
+
+  model ContentModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  field ContentField @relation(fields: [modelId, fieldId], references: [modelId, id], onDelete: Cascade)
+
+  entry ContentEntry @relation(fields: [environmentId, modelId, entryId], references: [environmentId, modelId, id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([environmentId, modelId, fieldId, entryId])
+  @@unique([environmentId, modelId, fieldId, valueHash])
+  @@index([environmentId, entryId])
+}
+
+// ============================================================
+// ASSETS
+// ============================================================
+
+model Asset {
+  id String @id @default(cuid())
+
+  environmentId String
+  environment   ApplicationEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  // Storage provider information
+  storageProvider String
+  storageBucket   String
+  storageKey      String
+
+  // File metadata
+  originalFilename String
+  mimeType         String
+  sizeBytes        Int
+  checksum         String?
+
+  // Upload lifecycle
+  status AssetStatus @default(UPLOADING)
+
+  // Optional creator information
+  createdByUserId String?
+  createdByUser   User?   @relation("AssetUserCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  createdByCredentialId String?
+  createdByCredential   ApplicationCredential? @relation("AssetCredentialCreator", fields: [createdByCredentialId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Deletion recovery and worker coordination
+  deletionLeaseToken     String?
+  deletionLeaseExpiresAt DateTime?
+
+  @@unique([storageProvider, storageBucket, storageKey])
+  @@index([environmentId, status])
+  @@index([environmentId, createdAt])
+  @@index([createdByUserId])
+  @@index([createdByCredentialId])
 }

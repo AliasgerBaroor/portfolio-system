@@ -1,13 +1,11 @@
 "use client";
 import { Button } from "@workspace/ui/components/button";
 import { Typography } from "@workspace/ui/components/typography/typography";
-import { Separator } from "@workspace/ui/components/separator";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/auth-context";
-import { usePortfolio } from "@/contexts/portfolio-context";
 import { Frame } from "@workspace/ui/components/frame";
-import { LogoutIcon, ChevronIcon } from "@/icons";
-
+import { useAuth } from "../../contexts/auth-context";
+import { usePortfolio } from "../../contexts/portfolio-context";
+import { LogoutIcon } from "../../icons";
 export default function Header() {
   const router = useRouter();
   const { logout } = useAuth();

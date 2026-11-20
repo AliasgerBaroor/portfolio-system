@@ -1,3 +1,4 @@
+
 import type { Context, Next } from "hono";
 import { verifyAccessToken } from "../lib/jwt";
 import { prisma } from "../lib/prisma";
@@ -31,39 +32,11 @@ export async function authMiddleware(
         );
     }
 
+    let userId: string;
+
     try {
         const payload = verifyAccessToken(token);
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id: payload.userId,
-            },
-            select: authUserSelect,
-        });
-
-        if (!user) {
-            return c.json(
-                {
-                    success: false,
-                    message: "User not found.",
-                },
-                401
-            );
-        }
-
-        if (!user.isActive || user.deletedAt) {
-            return c.json(
-                {
-                    success: false,
-                    message: "Account disabled.",
-                },
-                403
-            );
-        }
-
-        c.set("user", user);
-
-        await next();
+        userId = payload.userId;
     } catch {
         return c.json(
             {
@@ -73,4 +46,35 @@ export async function authMiddleware(
             401
         );
     }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: authUserSelect,
+    });
+
+    if (!user) {
+        return c.json(
+            {
+                success: false,
+                message: "User not found.",
+            },
+            401
+        );
+    }
+
+    if (!user.isActive || user.deletedAt) {
+        return c.json(
+            {
+                success: false,
+                message: "Account disabled.",
+            },
+            403
+        );
+    }
+
+    c.set("user", user);
+
+    await next();
 }

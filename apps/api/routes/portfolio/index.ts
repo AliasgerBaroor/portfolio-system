@@ -10,7 +10,7 @@ import sections from "./sections";
 import cms from "./cms";
 import { deletePortfolioHandler } from "./delete";
 
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 const portfolio = new Hono();
 

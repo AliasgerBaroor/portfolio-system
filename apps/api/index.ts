@@ -1,47 +1,31 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import "dotenv/config";
+
 import { serve } from "@hono/node-server";
+import { prisma } from "./lib/prisma";
+import app from "./app";
 
-import auth from "./routes/auth";
-import portfolio from "./routes/portfolio";
-import clientAccessKey from "./routes/client-access";
-import client from "./routes/client/";
+async function startServer() {
+  try {
+    console.log("[DB DEBUG] Connecting to database...");
 
-const app = new Hono();
+    await prisma.$connect();
 
-app.use(
-  "*",
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://portfolio-system-55xb.vercel.app",
-      "https://portfolio-system-caxn.vercel.app"
-    ],
-    credentials: true,
-  })
-);
+    console.log("[DB DEBUG] Prisma connected successfully");
 
-app.route("/auth", auth);
-app.route("/portfolio", portfolio);
+    const result = await prisma.portfolio.findFirst();
 
-app.route(
-  "/clients",
-  client
-);
-app.route(
-  "/client-access",
-  clientAccessKey
-);
+    console.log("[DB DEBUG] Portfolio query test:", result);
 
-app.get("/", (c) => {
-  return c.json({
-    success: true,
-    message: "Portfolio Platform API 🚀",
-  });
-});
+    serve({
+      fetch: app.fetch,
+      port: 8000,
+    });
 
-serve({
-  fetch: app.fetch,
-  port: 8000,
-});
+    console.log("[API] Server running on port 8000");
+  } catch (error) {
+    console.error("[DB DEBUG] Startup connection failed:", error);
+    process.exit(1);
+  }
+}
+
+startServer();

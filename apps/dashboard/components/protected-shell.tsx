@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/dashboard/header";
+import Header from "./dashboard/header";
 
 interface ProtectedShellProps {
     children: React.ReactNode;

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 import { revokeClientAccessKey } from "../../services/client-access-key/client-access-key.service";
 

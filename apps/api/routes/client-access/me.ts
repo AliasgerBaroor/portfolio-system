@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { clientAccessMiddleware } from "../../middleware/client-access";
+import { clientAccessMiddleware } from "../../middleware/client-access.middleware";
 
 const me = new Hono();
 

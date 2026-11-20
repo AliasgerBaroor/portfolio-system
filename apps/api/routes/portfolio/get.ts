@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware } from "../../middleware/auth.middleware";
 import { getPortfolio } from "../../services/portfolio/portfolio.service";
 
 const portfolio = new Hono();

@@ -9,13 +9,13 @@ import {
     type ReactNode,
 } from "react";
 
-import { portfolioService } from "@/services/portfolio.service";
+import { portfolioService } from "../services/portfolio.service";
 
 import type {
     Portfolio,
     CreatePortfolioRequest,
     UpdatePortfolioRequest,
-} from "@/types/portfolio";
+} from "../types/portfolio";
 
 import axios from "axios";
 

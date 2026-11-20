@@ -1,6 +1,6 @@
 
-import refreshClient from "@/lib/refresh";
-import { setAccessToken } from "@/lib/token";
+import refreshClient from "../lib/refresh";
+import { setAccessToken } from "../lib/token";
 
 type RefreshResponse = {
     accessToken: string;

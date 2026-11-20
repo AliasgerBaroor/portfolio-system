@@ -9,15 +9,15 @@ import {
     type ReactNode,
 } from "react";
 
-import { authService } from "@/services/auth.service";
+import { authService } from "../services/auth.service";
 import {
     setAccessToken,
     clearAccessToken,
-} from "@/lib/token";
+} from "../lib/token";
 
-import type { User } from "@/types/auth";
+import type { User } from "../types/auth";
 import axios from "axios";
-import { refreshAccessToken } from "@/lib/refresh-session";
+import { refreshAccessToken } from "../lib/refresh-session";
 
 type AuthContextType = {
     user: User | null;

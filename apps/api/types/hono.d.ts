@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole, ClientAccessSession, ClientAccessKey } from "@prisma/client";
 
 export interface AuthUser {
     id: string;
@@ -12,15 +12,25 @@ export interface AuthUser {
     deletedAt: Date | null;
 }
 
-import type { ClientAccessSession, ClientAccessKey } from "@prisma/client";
+export type ApplicationCredentialScope =
+    | "content.read"
+    | "content.write"
+    | "assets.read"
+    | "assets.write";
+
+export interface AuthenticatedApplicationCredential {
+    id: string;
+    environmentId: string;
+    applicationId: string;
+    scopes: ApplicationCredentialScope[];
+}
 
 declare module "hono" {
     interface ContextVariableMap {
         user: AuthUser;
-
-        clientAccessSession:
-        ClientAccessSession & {
+        clientAccessSession: ClientAccessSession & {
             accessKey: ClientAccessKey;
         };
+        applicationCredential: AuthenticatedApplicationCredential;
     }
 }

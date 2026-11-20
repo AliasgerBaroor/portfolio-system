@@ -45,3 +45,8 @@ yarn-error.log*
 next-env.d.ts
 
 exclude/
+# Local Prisma schema backup
+apps/api/prisma/schema.old.prisma
+
+# Local browser cookies
+cookies.txt

@@ -7,7 +7,7 @@ import type {
     Portfolio,
     UpdatePortfolioRequest,
     UpdatePortfolioResponse,
-} from "@/types/portfolio";
+} from "../types/portfolio";
 
 class PortfolioService {
     async getPortfolio() {

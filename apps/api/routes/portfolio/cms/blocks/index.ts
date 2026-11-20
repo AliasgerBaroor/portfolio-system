@@ -16,7 +16,7 @@ import {
     deleteCmsBlockHandler,
 } from "./delete";
 
-import { authMiddleware } from "../../../../middleware/auth";
+import { authMiddleware } from "../../../../middleware/auth.middleware";
 
 const blocks = new Hono();
 

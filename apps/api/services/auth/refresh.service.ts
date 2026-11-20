@@ -33,7 +33,10 @@ export async function refreshUserSession(
         throw new Error("Session expired.");
     }
 
-    if (!existingSession.user.isActive) {
+    if (
+        !existingSession.user.isActive ||
+        existingSession.user.deletedAt
+    ) {
         throw new Error("Account disabled.");
     }
 

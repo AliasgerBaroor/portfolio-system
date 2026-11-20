@@ -1,7 +1,7 @@
 
 import { Hono } from "hono";
 
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 import {
     getClientAccessKeys,

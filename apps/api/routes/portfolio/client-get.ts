@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { clientAccessMiddleware } from "../../middleware/client-access";
+import { clientAccessMiddleware } from "../../middleware/client-access.middleware";
 
 import { getClientPortfolio } from "../../services/portfolio/client-portfolio.service";
 

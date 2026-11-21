@@ -1,8 +1,10 @@
 {
-    "crons": [
-        {
-            "path": "/assets/reconcile-deletions",
-            "schedule": "0 3 * * *"
-        }
-    ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "schedules": {
+    "asset-deletion-reconciliation": {
+      "schedule": "0 3 * * *",
+      "path": "/assets/reconcile-deletions",
+      "requestMethod": "GET"
+    }
+  }
 }
